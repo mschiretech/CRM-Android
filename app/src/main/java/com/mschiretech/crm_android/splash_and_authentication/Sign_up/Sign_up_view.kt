@@ -56,7 +56,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.mschiretech.crm_android.R
-import com.mschiretech.crm_android.splash_and_authentication.OnbordingScreens
+import com.mschiretech.crm_android.navGraph.OnbordingScreens
 
 @Composable
 fun Sign_up_view(
@@ -166,7 +166,7 @@ fun Sign_up_view(
                             focusedLabelColor = Color.Black,
                             unfocusedLabelColor = Color.Black
                         ),
-                        // FIXED: Show error only if touched and invalid
+                        //Show error only if touched and invalid
                         isError = isFullNameTouched && !isFullNameValid,
                         supportingText = if (isFullNameTouched && !isFullNameValid) {
                             {
@@ -201,7 +201,7 @@ fun Sign_up_view(
                             focusedLabelColor = Color.Black,
                             unfocusedLabelColor = Color.Black
                         ),
-                        // FIXED: Show error only if touched and invalid
+                        //Show error only if touched and invalid
                         isError = isEmailTouched && email.isNotEmpty() && !isEmailValid,
                         supportingText = if (isEmailTouched && email.isNotEmpty() && !isEmailValid) {
                             {
@@ -249,7 +249,7 @@ fun Sign_up_view(
                             focusedLabelColor = Color.Black,
                             unfocusedLabelColor = Color.Black
                         ),
-                        // FIXED: Show error only if touched and password is not empty but weak
+                        //Show error only if touched and password is not empty but weak
                         isError = isPasswordTouched && password.isNotEmpty() && !isPasswordStrong,
                         supportingText = if (isPasswordTouched && password.isNotEmpty() && !isPasswordStrong) {
                             {
@@ -297,7 +297,7 @@ fun Sign_up_view(
                             focusedLabelColor = Color.Black,
                             unfocusedLabelColor = Color.Black
                         ),
-                        // FIXED: Show error only if touched and passwords don't match
+                        // Show error only if touched and passwords don't match
                         isError = isConfirmPasswordTouched && confirmPassword.isNotEmpty() && !isPasswordMatch,
                         supportingText = if (isConfirmPasswordTouched && confirmPassword.isNotEmpty() && !isPasswordMatch) {
                             {
@@ -310,15 +310,13 @@ fun Sign_up_view(
                     )
                     Spacer(Modifier.height(24.dp))
 
-                    // Sign Up Button - Always black color
+                    // Color will change  if the form is valid
                     Button(
                         onClick = {
-                            if (isFormValid) {
-                                // Navigate to next screen
-                                // navController.navigate(OnbordingScreens.NextScreen.route)
-                                // You can also add your sign up logic here
-                                println("Sign up successful for: $email") // For debugging
-                            }
+//                            if (isFormValid) {
+//                                // Navigate to next screen
+//                                // navController.navigate(OnbordingScreens.NextScreen.route)
+//                            }
                         },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color.Black
@@ -410,14 +408,9 @@ fun SocialLoginButton(icon: Painter, text: String) {
     }
 }
 
-// Fixed validation functions
+//validation functions
 fun isValidEmail(email: String): Boolean {
     return email.isNotEmpty() && android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
-}
-
-// Alternative simpler email validation if you don't want to use Patterns
-fun isSimpleValidEmail(email: String): Boolean {
-    return email.contains("@") && email.contains(".") && email.isNotEmpty()
 }
 
 fun isStrongPassword(password: String): Boolean {

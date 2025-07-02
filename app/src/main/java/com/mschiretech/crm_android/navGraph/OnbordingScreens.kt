@@ -1,4 +1,4 @@
-package com.mschiretech.crm_android.splash_and_authentication
+package com.mschiretech.crm_android.navGraph
 
 sealed class OnbordingScreens(val route : String) {
     object Splash: OnbordingScreens("splash")

@@ -55,7 +55,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.mschiretech.crm_android.R
-import com.mschiretech.crm_android.splash_and_authentication.OnbordingScreens
+import com.mschiretech.crm_android.navGraph.OnbordingScreens
 
 @Composable
 fun Sign_in_view(
@@ -135,7 +135,7 @@ fun Sign_in_view(
                 trailingIcon = {
                     IconButton(onClick = {
                         isPasswordVisible = !isPasswordVisible
-                    }) { // Toggle visibility
+                    }) {
                         Image(
                             painter = painterResource(id = if (isPasswordVisible) R.drawable.visibility else R.drawable.visibility_off),
                             contentDescription = "Toggle Password Visibility",
@@ -174,8 +174,6 @@ fun Sign_in_view(
             Button(
                 onClick = {
                     // TODO: Call viewModel.signIn(userName, password)
-                    // Then observe result from ViewModel to navigate or show error
-                    // Example: navController.navigate("home_screen")
                 },
                 colors = ButtonDefaults.buttonColors(Color.Black),
                 modifier = Modifier.fillMaxWidth()
