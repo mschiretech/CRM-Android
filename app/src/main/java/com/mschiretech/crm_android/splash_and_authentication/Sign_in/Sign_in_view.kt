@@ -18,14 +18,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.MailOutline
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -55,7 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.mschiretech.crm_android.R
-import com.mschiretech.crm_android.navGraph.OnbordingScreens
+import com.mschiretech.crm_android.navGraph.OnboardingScreens
 
 @Composable
 fun Sign_in_view(
@@ -166,8 +163,7 @@ fun Sign_in_view(
                     .align(Alignment.Start)
                     .padding(bottom = 16.dp)
                     .clickable {
-                        // TODO: Navigate to forgot password screen
-                        // navController.navigate("forgot_password_screen")
+                         navController.navigate(OnboardingScreens.Forgot_password.route)
                     }
             )
             Spacer(Modifier.height(24.dp))
@@ -224,7 +220,7 @@ fun Sign_in_view(
                     color = Color.Blue,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.clickable {
-                        navController.navigate(OnbordingScreens.Sign_up.route)
+                        navController.navigate(OnboardingScreens.Sign_up.route)
                     }
                 )
             }

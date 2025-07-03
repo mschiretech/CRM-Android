@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.mschiretech.crm_android.R
-import com.mschiretech.crm_android.navGraph.OnbordingScreens
+import com.mschiretech.crm_android.navGraph.OnboardingScreens
 import kotlinx.coroutines.delay
 
 @Composable
@@ -44,7 +44,7 @@ fun SplashScreen(
         isVisible = true
         delay(3000)
         navController.popBackStack()
-        navController.navigate(OnbordingScreens.Sign_in.route)
+        navController.navigate(OnboardingScreens.Sign_in.route)
     }
 
     Box(

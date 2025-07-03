@@ -56,7 +56,10 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.mschiretech.crm_android.R
-import com.mschiretech.crm_android.navGraph.OnbordingScreens
+import com.mschiretech.crm_android.navGraph.OnboardingScreens
+import com.mschiretech.crm_android.varifications.email.isValidEmail
+import com.mschiretech.crm_android.varifications.password.getPasswordStrengthMessage
+import com.mschiretech.crm_android.varifications.password.isStrongPassword
 
 @Composable
 fun Sign_up_view(
@@ -177,6 +180,7 @@ fun Sign_up_view(
                             }
                         } else null
                     )
+                    //Email text field
                     OutlinedTextField(
                         value = email,
                         onValueChange = {
@@ -254,8 +258,8 @@ fun Sign_up_view(
                         supportingText = if (isPasswordTouched && password.isNotEmpty() && !isPasswordStrong) {
                             {
                                 Text(
-                                    "Password must be 8+ chars with uppercase, lowercase, number & special character",
-                                    color = MaterialTheme.colorScheme.error
+                                    getPasswordStrengthMessage(password),
+                                    color = MaterialTheme.colorScheme.onTertiaryContainer
                                 )
                             }
                         } else null
@@ -313,10 +317,11 @@ fun Sign_up_view(
                     // Color will change  if the form is valid
                     Button(
                         onClick = {
-//                            if (isFormValid) {
-//                                // Navigate to next screen
-//                                // navController.navigate(OnbordingScreens.NextScreen.route)
-//                            }
+                            if (isFormValid) {
+                                // Navigate to Sign in screen
+                                 navController.navigate(OnboardingScreens.Sign_in.route)
+                                //TODO: Add a toast that "you have signed up successfully"
+                            }
                         },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color.Black
@@ -374,7 +379,7 @@ fun Sign_up_view(
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.clickable {
                         navController.popBackStack()
-                        navController.navigate(OnbordingScreens.Sign_in.route)
+                        navController.navigate(OnboardingScreens.Sign_in.route)
                     }
                 )
             }
@@ -405,88 +410,6 @@ fun SocialLoginButton(icon: Painter, text: String) {
             Spacer(modifier = Modifier.width(12.dp))
             Text(text)
         }
-    }
-}
-
-//validation functions
-fun isValidEmail(email: String): Boolean {
-    return email.isNotEmpty() && android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
-}
-
-fun isStrongPassword(password: String): Boolean {
-    // Check minimum length
-    if (password.length < 8) return false
-
-    // Check for at least one lowercase letter
-    val hasLowercase = password.any { it.isLowerCase() }
-
-    // Check for at least one uppercase letter
-    val hasUppercase = password.any { it.isUpperCase() }
-
-    // Check for at least one digit
-    val hasDigit = password.any { it.isDigit() }
-
-    // Check for at least one special character
-    val specialChars = "!@#$%^&*()_+-=[]{}|;:,.<>?"
-    val hasSpecialChar = password.any { it in specialChars }
-
-    return hasLowercase && hasUppercase && hasDigit && hasSpecialChar
-}
-
-
-fun getPasswordStrengthMessage(password: String): String {
-    if (password.isEmpty()) return ""
-
-    val issues = mutableListOf<String>()
-
-    if (password.length < 8) issues.add("8+ characters")
-    if (!password.any { it.isLowerCase() }) issues.add("lowercase letter")
-    if (!password.any { it.isUpperCase() }) issues.add("uppercase letter")
-    if (!password.any { it.isDigit() }) issues.add("number")
-    if (!password.any { it in "!@#$%^&*()_+-=[]{}|;:,.<>?" }) issues.add("special character")
-
-    return if (issues.isEmpty()) {
-        "Strong password!"
-    } else {
-        "Missing: ${issues.joinToString(", ")}"
-    }
-}
-
-@Composable
-fun PasswordStrengthIndicator(password: String) {
-    val strength = when {
-        password.isEmpty() -> 0
-        password.length < 8 -> 1
-        !password.any { it.isLowerCase() } || !password.any { it.isUpperCase() } -> 2
-        !password.any { it.isDigit() } -> 3
-        !password.any { it in "!@#$%^&*()_+-=[]{}|;:,.<>?" } -> 4
-        else -> 5
-    }
-
-    val color = when (strength) {
-        0, 1 -> Color.Red
-        2, 3 -> Color.Red
-        4 -> Color.Yellow
-        5 -> Color.Green
-        else -> Color.Gray
-    }
-
-    val strengthText = when (strength) {
-        0 -> ""
-        1 -> "Very Weak"
-        2 -> "Weak"
-        3 -> "Fair"
-        4 -> "Good"
-        5 -> "Strong"
-        else -> ""
-    }
-
-    if (password.isNotEmpty()) {
-        Text(
-            text = strengthText,
-            color = color,
-            style = MaterialTheme.typography.bodySmall
-        )
     }
 }
 
