@@ -43,6 +43,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
@@ -56,10 +57,12 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.mschiretech.crm_android.R
+import com.mschiretech.crm_android.dialogs.Dialog
 import com.mschiretech.crm_android.navGraph.OnboardingScreens
 import com.mschiretech.crm_android.varifications.email.isValidEmail
 import com.mschiretech.crm_android.varifications.password.getPasswordStrengthMessage
 import com.mschiretech.crm_android.varifications.password.isStrongPassword
+import com.mschiretech.crm_android.varifications.userFinder.isNewUserExist
 
 @Composable
 fun Sign_up_view(
@@ -79,6 +82,8 @@ fun Sign_up_view(
     var isPasswordTouched by remember { mutableStateOf(false) }
     var isConfirmPasswordTouched by remember { mutableStateOf(false) }
 
+    var showDialog by remember { mutableStateOf(false) }
+
     // Derived states for validation
     val isEmailValid by remember {
         derivedStateOf { isValidEmail(email) }
@@ -94,6 +99,9 @@ fun Sign_up_view(
 
     val isFullNameValid by remember {
         derivedStateOf { fullName.trim().length >= 2 }
+    }
+    val isUserExist by remember {
+        derivedStateOf { !isNewUserExist(fullName, email) }
     }
 
     val isFormValid by remember {
@@ -136,7 +144,10 @@ fun Sign_up_view(
 
             Card(
                 elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
-                colors = CardDefaults.cardColors(Color(0xFF9BAEDA)),
+                colors = CardDefaults.cardColors(
+                    if (isSystemInDarkTheme()) Color(0xFC171736)
+                    else Color(0xF7919DE7)
+                ),
                 shape = RoundedCornerShape(24.dp)
 //                modifier = Modifier.padding(16.dp)
             ) {
@@ -158,16 +169,22 @@ fun Sign_up_view(
                             Icon(
                                 Icons.Default.Person,
                                 contentDescription = "Full Name",
-                                tint = Color.Black
+                                tint = if (isSystemInDarkTheme()) Color.White
+                                else Color.Black
                             )
                         },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color.Gray,
-                            unfocusedBorderColor = Color.Black,
-                            cursorColor = Color.Black,
-                            focusedLabelColor = Color.Black,
-                            unfocusedLabelColor = Color.Black
+                            focusedBorderColor = if (isSystemInDarkTheme()) Color.White
+                            else Color.Black,
+                            unfocusedBorderColor = if (isSystemInDarkTheme()) Color.White
+                            else Color.Black,
+                            cursorColor = if (isSystemInDarkTheme()) Color.White
+                            else Color.Black,
+                            focusedLabelColor = if (isSystemInDarkTheme()) Color.White
+                            else Color.Black,
+                            unfocusedLabelColor = if (isSystemInDarkTheme()) Color.White
+                            else Color.Black,
                         ),
                         //Show error only if touched and invalid
                         isError = isFullNameTouched && !isFullNameValid,
@@ -192,18 +209,24 @@ fun Sign_up_view(
                             Icon(
                                 Icons.Default.Email,
                                 contentDescription = "Email Icon",
-                                tint = Color.Black
+                                tint = if (isSystemInDarkTheme()) Color.White
+                                else Color.Black,
                             )
                         },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                         singleLine = true,
                         shape = RoundedCornerShape(24.dp),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color.Gray,
-                            unfocusedBorderColor = Color.Black,
-                            cursorColor = Color.Black,
-                            focusedLabelColor = Color.Black,
-                            unfocusedLabelColor = Color.Black
+                            focusedBorderColor = if (isSystemInDarkTheme()) Color.White
+                            else Color.Black,
+                            unfocusedBorderColor = if (isSystemInDarkTheme()) Color.White
+                            else Color.Black,
+                            cursorColor = if (isSystemInDarkTheme()) Color.White
+                            else Color.Black,
+                            focusedLabelColor = if (isSystemInDarkTheme()) Color.White
+                            else Color.Black,
+                            unfocusedLabelColor = if (isSystemInDarkTheme()) Color.White
+                            else Color.Black,
                         ),
                         //Show error only if touched and invalid
                         isError = isEmailTouched && email.isNotEmpty() && !isEmailValid,
@@ -228,7 +251,8 @@ fun Sign_up_view(
                             Icon(
                                 Icons.Default.Lock,
                                 contentDescription = "Password Icon",
-                                tint = Color.Black
+                                tint = if (isSystemInDarkTheme()) Color.White
+                                else Color.Black,
                             )
                         },
                         visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -239,7 +263,11 @@ fun Sign_up_view(
                                 Image(
                                     painter = painterResource(id = if (isPasswordVisible) R.drawable.visibility else R.drawable.visibility_off),
                                     contentDescription = "Toggle Password Visibility",
-                                    modifier = Modifier.size(24.dp)
+                                    modifier = Modifier.size(24.dp),
+                                    colorFilter = ColorFilter.tint(
+                                        if (isSystemInDarkTheme()) Color.White
+                                        else Color.Black
+                                    )
                                 )
                             }
                         },
@@ -247,11 +275,16 @@ fun Sign_up_view(
                         singleLine = true,
                         shape = RoundedCornerShape(24.dp),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color.Gray,
-                            unfocusedBorderColor = Color.Black,
-                            cursorColor = Color.Black,
-                            focusedLabelColor = Color.Black,
-                            unfocusedLabelColor = Color.Black
+                            focusedBorderColor = if (isSystemInDarkTheme()) Color.White
+                            else Color.Black,
+                            unfocusedBorderColor = if (isSystemInDarkTheme()) Color.White
+                            else Color.Black,
+                            cursorColor = if (isSystemInDarkTheme()) Color.White
+                            else Color.Black,
+                            focusedLabelColor = if (isSystemInDarkTheme()) Color.White
+                            else Color.Black,
+                            unfocusedLabelColor = if (isSystemInDarkTheme()) Color.White
+                            else Color.Black,
                         ),
                         //Show error only if touched and password is not empty but weak
                         isError = isPasswordTouched && password.isNotEmpty() && !isPasswordStrong,
@@ -276,7 +309,8 @@ fun Sign_up_view(
                             Icon(
                                 Icons.Default.Lock,
                                 contentDescription = "Password Icon",
-                                tint = Color.Black
+                                tint = if (isSystemInDarkTheme()) Color.White
+                                else Color.Black,
                             )
                         },
                         visualTransformation = if (isConfirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -285,9 +319,13 @@ fun Sign_up_view(
                                 isConfirmPasswordVisible = !isConfirmPasswordVisible
                             }) {
                                 Image(
-                                    painter = painterResource(id = if (isConfirmPasswordVisible) R.drawable.visibility else R.drawable.visibility_off),
+                                    painter = painterResource(id = if (isPasswordVisible) R.drawable.visibility else R.drawable.visibility_off),
                                     contentDescription = "Toggle Password Visibility",
-                                    modifier = Modifier.size(24.dp)
+                                    modifier = Modifier.size(24.dp),
+                                    colorFilter = ColorFilter.tint(
+                                        if (isSystemInDarkTheme()) Color.White
+                                        else Color.Black
+                                    )
                                 )
                             }
                         },
@@ -295,11 +333,16 @@ fun Sign_up_view(
                         singleLine = true,
                         shape = RoundedCornerShape(24.dp),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color.Gray,
-                            unfocusedBorderColor = Color.Black,
-                            cursorColor = Color.Black,
-                            focusedLabelColor = Color.Black,
-                            unfocusedLabelColor = Color.Black
+                            focusedBorderColor = if (isSystemInDarkTheme()) Color.White
+                            else Color.Black,
+                            unfocusedBorderColor = if (isSystemInDarkTheme()) Color.White
+                            else Color.Black,
+                            cursorColor = if (isSystemInDarkTheme()) Color.White
+                            else Color.Black,
+                            focusedLabelColor = if (isSystemInDarkTheme()) Color.White
+                            else Color.Black,
+                            unfocusedLabelColor = if (isSystemInDarkTheme()) Color.White
+                            else Color.Black,
                         ),
                         // Show error only if touched and passwords don't match
                         isError = isConfirmPasswordTouched && confirmPassword.isNotEmpty() && !isPasswordMatch,
@@ -314,17 +357,29 @@ fun Sign_up_view(
                     )
                     Spacer(Modifier.height(24.dp))
 
+                    Dialog(
+                        showDialog = showDialog,
+                        onDismiss = { showDialog = false },
+                        title = "Error",
+                        message = "User already exists"
+                    )
+
                     // Color will change  if the form is valid
                     Button(
                         onClick = {
                             if (isFormValid) {
-                                // Navigate to Sign in screen
-                                 navController.navigate(OnboardingScreens.Sign_in.route)
+                               //userExists = true for now
+                                if (isUserExist) {
+                                    navController.popBackStack()
+                                } else {
+                                    showDialog = true
+                                }
                                 //TODO: Add a toast that "you have signed up successfully"
                             }
                         },
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.Black
+                            containerColor = if (isSystemInDarkTheme()) Color.White
+                            else Color.Black
                         ),
                         modifier = Modifier
                             .fillMaxWidth()

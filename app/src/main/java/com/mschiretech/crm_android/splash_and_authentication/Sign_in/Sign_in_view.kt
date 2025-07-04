@@ -32,6 +32,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,6 +40,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
@@ -52,7 +54,9 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.mschiretech.crm_android.R
+import com.mschiretech.crm_android.dialogs.Dialog
 import com.mschiretech.crm_android.navGraph.OnboardingScreens
+import com.mschiretech.crm_android.varifications.userFinder.isUserExist
 
 @Composable
 fun Sign_in_view(
@@ -60,10 +64,14 @@ fun Sign_in_view(
     // viewModel: SignInViewModel
 ) {
     var userName by remember { mutableStateOf("") }
-    var isNotValidName by remember { mutableStateOf(false) }
     var password by remember { mutableStateOf("") }
-    var isNotValidPassword by remember { mutableStateOf(false) }
     var isPasswordVisible by remember { mutableStateOf(false) }
+    var showDialog by remember { mutableStateOf(false) }
+
+
+    val isUserExist by remember {
+        derivedStateOf { isUserExist(userName, password) }
+    }
 
     Scaffold { paddingValues ->
         Column(
@@ -107,16 +115,27 @@ fun Sign_in_view(
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 shape = RoundedCornerShape(24.dp),
-                leadingIcon = {Icon(Icons.Default.Person, contentDescription = "Password Icon",tint = Color.Black)},
+                leadingIcon = {
+                    Icon(
+                        Icons.Default.Person,
+                        contentDescription = "Password Icon",
+                        tint = if (isSystemInDarkTheme()) Color.White
+                        else Color.Black
+                    )
+                },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color.Gray,
-                    unfocusedBorderColor = Color.Black,
-                    cursorColor = Color.Black,
-                    focusedLabelColor = Color.Black,
-                    unfocusedLabelColor = Color.Black
-                ),
-                isError = isNotValidName
+                    focusedBorderColor = if (isSystemInDarkTheme()) Color.White
+                    else Color.Black,
+                    unfocusedBorderColor = if (isSystemInDarkTheme()) Color.White
+                    else Color.Black,
+                    cursorColor = if (isSystemInDarkTheme()) Color.White
+                    else Color.Black,
+                    focusedLabelColor = if (isSystemInDarkTheme()) Color.White
+                    else Color.Black,
+                    unfocusedLabelColor = if (isSystemInDarkTheme()) Color.White
+                    else Color.Black,
+                )
             )
 
             Spacer(Modifier.height(8.dp))
@@ -127,7 +146,14 @@ fun Sign_in_view(
                 onValueChange = { password = it },
                 label = { Text("Password", fontStyle = FontStyle.Italic) },
                 modifier = Modifier.fillMaxWidth(),
-                leadingIcon = {Icon(Icons.Default.Lock, contentDescription = "Password Icon",tint = Color.Black)},
+                leadingIcon = {
+                    Icon(
+                        Icons.Default.Lock,
+                        contentDescription = "Password Icon",
+                        tint = if (isSystemInDarkTheme()) Color.White
+                        else Color.Black,
+                    )
+                },
                 visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(), // Show/hide password
                 trailingIcon = {
                     IconButton(onClick = {
@@ -136,7 +162,11 @@ fun Sign_in_view(
                         Image(
                             painter = painterResource(id = if (isPasswordVisible) R.drawable.visibility else R.drawable.visibility_off),
                             contentDescription = "Toggle Password Visibility",
-                            modifier = Modifier.size(24.dp)
+                            modifier = Modifier.size(24.dp),
+                            colorFilter = ColorFilter.tint(
+                                if (isSystemInDarkTheme()) Color.White
+                                else Color.Black,
+                            )
                         )
                     }
                 },
@@ -145,57 +175,84 @@ fun Sign_in_view(
                 singleLine = true,
                 shape = RoundedCornerShape(24.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color.Gray,
-                    unfocusedBorderColor = Color.Black,
-                    cursorColor = Color.Black,
-                    focusedLabelColor = Color.Black,
-                    unfocusedLabelColor = Color.Black
-                ),
-                isError = isNotValidPassword
+                    focusedBorderColor = if (isSystemInDarkTheme()) Color.White
+                    else Color.Black,
+                    unfocusedBorderColor = if (isSystemInDarkTheme()) Color.White
+                    else Color.Black,
+                    cursorColor = if (isSystemInDarkTheme()) Color.White
+                    else Color.Black,
+                    focusedLabelColor = if (isSystemInDarkTheme()) Color.White
+                    else Color.Black,
+                    unfocusedLabelColor = if (isSystemInDarkTheme()) Color.White
+                    else Color.Black,
+                )
             )
             Text(
                 "Forgot Password?",
                 style = MaterialTheme.typography.bodyMedium,
                 textDecoration = TextDecoration.Underline,
-                color = Color(0xFFEF5A5A),
+                color = Color(0xFFFF0000),
                 modifier = Modifier
                     .padding(top = 8.dp)
                     .align(Alignment.Start)
                     .padding(bottom = 16.dp)
                     .clickable {
-                         navController.navigate(OnboardingScreens.Forgot_password.route)
+                        navController.navigate(OnboardingScreens.Forgot_password.route)
                     }
             )
+
+            Dialog(
+                showDialog = showDialog,
+                onDismiss = { showDialog = false },
+                title = "Error",
+                message = "Invalid username or password"
+            )
+
             Spacer(Modifier.height(24.dp))
             Button(
                 onClick = {
-                    // TODO: Call viewModel.signIn(userName, password)
+                    //isUserExist = false for now
+                    if (isUserExist) {
+                        //navController.navigate(OnboardingScreens.Home.route)
+                    } else {
+                        showDialog = true
+                        userName = ""
+                        password = ""
+                    }
                 },
-                colors = ButtonDefaults.buttonColors(Color.Black),
+                colors = ButtonDefaults.buttonColors(
+                    if (isSystemInDarkTheme()) Color.White
+                    else Color.Black,
+                ),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Sign In")
             }
 
             Spacer(modifier = Modifier.height(12.dp))
-           Row(
-               modifier = Modifier.fillMaxWidth().width(24.dp).padding( 16.dp),
-               verticalAlignment = Alignment.CenterVertically
-           ){
-               Divider(
-                   color = Color.Black,
-                   modifier = Modifier.weight(1f)
-               )
-               Text(
-                   "Or",
-                   style = MaterialTheme.typography.bodyMedium,
-                   modifier = Modifier.padding(horizontal = 16.dp)
-               )
-               Divider(
-                   color = Color.Black,
-                   modifier = Modifier.weight(1f)
-               )
-           }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .width(24.dp)
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Divider(
+                    color = if (isSystemInDarkTheme()) Color.White
+                    else Color.Black,
+                    modifier = Modifier.weight(1f)
+                )
+                Text(
+                    "Or",
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
+                Divider(
+                    color = if (isSystemInDarkTheme()) Color.White
+                    else Color.Black,
+                    modifier = Modifier.weight(1f)
+                )
+            }
             Spacer(modifier = Modifier.height(12.dp))
 
             SocialLoginButton(
@@ -213,7 +270,11 @@ fun Sign_in_view(
             Spacer(modifier = Modifier.height(24.dp))
 
             Row {
-                Text("Don’t have an account? ", color = Color.Black)
+                Text(
+                    "Don’t have an account? ",
+                    color = if (isSystemInDarkTheme()) Color.White
+                    else Color.Black
+                )
                 Text(
                     "Sign up",
                     textDecoration = TextDecoration.Underline,

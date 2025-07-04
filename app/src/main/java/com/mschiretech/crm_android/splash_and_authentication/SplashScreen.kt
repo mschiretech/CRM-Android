@@ -42,7 +42,7 @@ fun SplashScreen(
 
     LaunchedEffect(Unit) {
         isVisible = true
-        delay(3000)
+        delay(1000)
         navController.popBackStack()
         navController.navigate(OnboardingScreens.Sign_in.route)
     }
