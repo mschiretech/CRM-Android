@@ -53,15 +53,31 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.mschiretech.crm_android.R
+import com.mschiretech.crm_android.dialogs.Dialog
 import com.mschiretech.crm_android.varifications.email.isValidEmail
 import com.mschiretech.crm_android.varifications.otp.otp_verification
 import com.mschiretech.crm_android.varifications.password.getPasswordStrengthMessage
 import com.mschiretech.crm_android.varifications.password.isStrongPassword
+import com.mschiretech.crm_android.varifications.userFinder.isEmailExist
 
 @Composable
 fun Forgot_password_view(
     navController: NavController,
 ) {
+    var email by remember { mutableStateOf("") }
+    var showOptSection by remember { mutableStateOf(false) }
+    var showResetPasswordSection by remember { mutableStateOf(false) }
+    var isEmailTouched by remember { mutableStateOf(false) }
+
+    var showDialog by remember { mutableStateOf(false) }
+
+    val isEmailValid by remember {
+        derivedStateOf { isValidEmail(email) }
+    }
+    val isEmailExist by remember {
+        derivedStateOf { isEmailExist(email) }
+    }
+
     Scaffold { paddingValues ->
         Column(
             modifier = Modifier
@@ -73,14 +89,7 @@ fun Forgot_password_view(
                 .padding(paddingValues)
                 .padding(horizontal = 24.dp),
         ) {
-            var email by remember { mutableStateOf("") }
-            var showOptSection by remember { mutableStateOf(false) }
-            var showResetPasswordSection by remember { mutableStateOf(false) }
-            var isEmailTouched by remember { mutableStateOf(false) }
 
-            val isEmailValid by remember {
-                derivedStateOf { isValidEmail(email) }
-            }
 
             Text(
                 "Forgot Password",
@@ -140,12 +149,22 @@ fun Forgot_password_view(
                     } else null
                 )
                 Spacer(Modifier.height(24.dp))
-
+                Dialog(
+                    showDialog = showDialog,
+                    onDismiss = { showDialog = false},
+                    title = "Email not found",
+                    message = "Please enter a valid email address"
+                )
                 Button(
                     onClick = {
                         if (isEmailValid) {
+                            if (isEmailExist){
                             // Add logic to send reset password link to email
                             showOptSection = true
+                            }
+                            else{
+                                showDialog = true
+                            }
                         }
                     },
                     colors = ButtonDefaults.buttonColors(
