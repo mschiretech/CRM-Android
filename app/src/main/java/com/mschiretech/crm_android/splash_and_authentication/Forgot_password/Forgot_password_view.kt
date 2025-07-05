@@ -16,10 +16,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -27,6 +30,8 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -39,6 +44,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
@@ -60,6 +66,7 @@ import com.mschiretech.crm_android.varifications.password.getPasswordStrengthMes
 import com.mschiretech.crm_android.varifications.password.isStrongPassword
 import com.mschiretech.crm_android.varifications.userFinder.isEmailExist
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Forgot_password_view(
     navController: NavController,
@@ -78,7 +85,21 @@ fun Forgot_password_view(
         derivedStateOf { isEmailExist(email) }
     }
 
-    Scaffold { paddingValues ->
+    Scaffold (
+        topBar = {
+            TopAppBar(
+                title = { Text("Forgot Password") },
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent
+                )
+            )
+        }
+    ){ paddingValues ->
         Column(
             modifier = Modifier
                 .background(
@@ -89,23 +110,21 @@ fun Forgot_password_view(
                 .padding(paddingValues)
                 .padding(horizontal = 24.dp),
         ) {
-
-
-            Text(
-                "Forgot Password",
-                modifier = Modifier.padding(vertical = 16.dp),
-                color = Color.Black,
-                style = MaterialTheme.typography.headlineMedium.copy(
-                    fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
-                    fontWeight = FontWeight.Bold
+            Column {
+                Text(
+                    text = "Reset Your Password",
+                    style = MaterialTheme.typography.headlineMedium.copy(
+                        fontWeight = FontWeight.Bold
+                    ),
+                    color = MaterialTheme.colorScheme.onBackground
                 )
-            )
-            Text(
-                "Please enter your email address to receive OTP",
-                modifier = Modifier,
-                color = Color.Black,
-                style = MaterialTheme.typography.bodyMedium
-            )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Enter your email address and we'll send you an OTP to reset your password",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+                )
+            }
 
             Spacer(modifier = Modifier.height(32.dp))
 
@@ -125,20 +144,26 @@ fun Forgot_password_view(
                         Icon(
                             Icons.Default.Email,
                             contentDescription = "Email Icon",
-                            tint = Color.Black
+                            tint = if (isSystemInDarkTheme()) Color.White
+                            else Color.Black
                         )
                     },
+                    modifier = Modifier.fillMaxWidth(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                     singleLine = true,
                     shape = RoundedCornerShape(24.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Color.Gray,
-                        unfocusedBorderColor = Color.Black,
-                        cursorColor = Color.Black,
-                        focusedLabelColor = Color.Black,
-                        unfocusedLabelColor = Color.Black
-                    ),
-                    isError = isEmailTouched && email.isNotEmpty() && !isEmailValid,
+                        focusedBorderColor = if (isSystemInDarkTheme()) Color.White
+                        else Color.Black,
+                        unfocusedBorderColor = if (isSystemInDarkTheme()) Color.White
+                        else Color.Black,
+                        cursorColor = if (isSystemInDarkTheme()) Color.White
+                        else Color.Black,
+                        focusedLabelColor = if (isSystemInDarkTheme()) Color.White
+                        else Color.Black,
+                        unfocusedLabelColor = if (isSystemInDarkTheme()) Color.White
+                        else Color.Black,
+                    ),                    isError = isEmailTouched && email.isNotEmpty() && !isEmailValid,
                     supportingText = if (isEmailTouched && email.isNotEmpty() && !isEmailValid) {
                         {
                             Text(
@@ -151,24 +176,24 @@ fun Forgot_password_view(
                 Spacer(Modifier.height(24.dp))
                 Dialog(
                     showDialog = showDialog,
-                    onDismiss = { showDialog = false},
+                    onDismiss = { showDialog = false },
                     title = "Email not found",
                     message = "Please enter a valid email address"
                 )
                 Button(
                     onClick = {
                         if (isEmailValid) {
-                            if (isEmailExist){
-                            // Add logic to send reset password link to email
-                            showOptSection = true
-                            }
-                            else{
+                            if (isEmailExist) {
+                                // Add logic to send reset password link to email
+                                showOptSection = true
+                            } else {
                                 showDialog = true
                             }
                         }
                     },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.Black
+                        containerColor = if (isSystemInDarkTheme()) Color.White
+                        else Color.Black
                     ),
                     modifier = Modifier
                         .padding(horizontal = 8.dp),
@@ -176,7 +201,8 @@ fun Forgot_password_view(
                 ) {
                     Text(
                         "Send OTP",
-                        color = Color.White,
+                        color = if (isSystemInDarkTheme()) Color.Black
+                        else Color.White,
                         modifier = Modifier.padding(horizontal = 8.dp)
                     )
                 }
@@ -209,6 +235,7 @@ fun IndividualOTPTextFields(
     email: String,
     onOTPVerified: () -> Unit
 ) {
+    var showDialog by remember { mutableStateOf(false) }
     val otpLength = 6
     val otpValues = remember {
         mutableStateListOf<String>().apply {
@@ -223,15 +250,16 @@ fun IndividualOTPTextFields(
     Column(
         modifier = Modifier.fillMaxWidth(),
 
-    ) {
+        ) {
         Text("OTP sent to $email check your inbox.")
         Spacer(Modifier.height(16.dp))
         Text(
             "Enter OTP",
             style = MaterialTheme.typography.headlineSmall.copy(
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
             ),
-            color = Color.Black
+            color = if (isSystemInDarkTheme()) Color.White
+            else Color.Black,
         )
         Spacer(Modifier.height(16.dp))
         Column(
@@ -267,23 +295,38 @@ fun IndividualOTPTextFields(
                             .size(50.dp)
                             .focusRequester(focusRequesters[index]),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color.Black,
-                            unfocusedBorderColor = Color.Black
-                        )
+                            focusedBorderColor = if (isSystemInDarkTheme()) Color.White
+                            else Color.Black,
+                            unfocusedBorderColor = if (isSystemInDarkTheme()) Color.White
+                            else Color.Black,
+                            cursorColor = if (isSystemInDarkTheme()) Color.White
+                            else Color.Black,
+                            focusedLabelColor = if (isSystemInDarkTheme()) Color.White
+                            else Color.Black,
+                            unfocusedLabelColor = if (isSystemInDarkTheme()) Color.White
+                            else Color.Black,
+                        ),
                     )
                 }
             }
             Spacer(Modifier.height(16.dp))
+            Dialog(
+                showDialog = showDialog,
+                onDismiss = { showDialog = false },
+                title = "OTP matched",
+                message = "Please check the otp"
+            )
 
             Button(
                 onClick = {
                     val enteredOTP = otpValues.joinToString("")
                     if (otp_verification(enteredOTP, receivedOTP)) {
                         onOTPVerified()
-                    }
+                    } else showDialog = true
                 },
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.Black
+                    containerColor = if (isSystemInDarkTheme()) Color.White
+                    else Color.Black
                 ),
                 modifier = Modifier
                     .padding(horizontal = 8.dp),
@@ -291,7 +334,8 @@ fun IndividualOTPTextFields(
             ) {
                 Text(
                     "Verify OTP",
-                    color = Color.White,
+                    color = if (isSystemInDarkTheme()) Color.Black
+                    else Color.White,
                     modifier = Modifier.padding(horizontal = 8.dp)
                 )
             }
@@ -306,6 +350,8 @@ fun ResetPasswordField(
     var password by remember { mutableStateOf("") }
     var isPasswordVisible by remember { mutableStateOf(false) }
     var isPasswordTouched by remember { mutableStateOf(false) }
+    var successDialog by remember { mutableStateOf(false) }
+    var errorDialog by remember { mutableStateOf(false) }
 
     val isPasswordStrong by remember {
         derivedStateOf { isStrongPassword(password) }
@@ -338,7 +384,8 @@ fun ResetPasswordField(
                     Icon(
                         Icons.Default.Lock,
                         contentDescription = "Password Icon",
-                        tint = Color.Black
+                        tint = if (isSystemInDarkTheme()) Color.White
+                        else Color.Black
                     )
                 },
                 visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -349,7 +396,9 @@ fun ResetPasswordField(
                         Image(
                             painter = painterResource(id = if (isPasswordVisible) R.drawable.visibility else R.drawable.visibility_off),
                             contentDescription = "Toggle Password Visibility",
-                            modifier = Modifier.size(24.dp)
+                            modifier = Modifier.size(24.dp),
+                            colorFilter = ColorFilter.tint(if (isSystemInDarkTheme()) Color.White
+                            else Color.Black)
                         )
                     }
                 },
@@ -357,11 +406,16 @@ fun ResetPasswordField(
                 singleLine = true,
                 shape = RoundedCornerShape(24.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color.Gray,
-                    unfocusedBorderColor = Color.Black,
-                    cursorColor = Color.Black,
-                    focusedLabelColor = Color.Black,
-                    unfocusedLabelColor = Color.Black
+                    focusedBorderColor = if (isSystemInDarkTheme()) Color.White
+                    else Color.Black,
+                    unfocusedBorderColor = if (isSystemInDarkTheme()) Color.White
+                    else Color.Black,
+                    cursorColor = if (isSystemInDarkTheme()) Color.White
+                    else Color.Black,
+                    focusedLabelColor = if (isSystemInDarkTheme()) Color.White
+                    else Color.Black,
+                    unfocusedLabelColor = if (isSystemInDarkTheme()) Color.White
+                    else Color.Black,
                 ),
                 isError = isPasswordTouched && password.isNotEmpty() && !isPasswordStrong,
                 supportingText = if (isPasswordTouched && password.isNotEmpty() && !isPasswordStrong) {
@@ -377,15 +431,38 @@ fun ResetPasswordField(
 
             Spacer(Modifier.height(24.dp))
 
+            //If password updated
+            var shouldNavigate by remember { mutableStateOf(false) }
+
+            Dialog(
+                successDialog,
+                onDismiss = {
+                   successDialog = false
+                },
+                title = "Success",
+                message = "Your Password is changed successfully"
+            )
+            //If Password is not updated
+            Dialog(
+                errorDialog,
+                onDismiss = {
+                    errorDialog = false
+                },
+                title = "Error",
+                message = "Some error occurred"
+            )
             Button(
                 onClick = {
                     if (isPasswordStrong) {
                         // Add logic to update password in backend
-                        onPasswordReset()
-                    }
+                        onPasswordReset
+                        successDialog = true
+
+                    } else errorDialog = true
                 },
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.Black
+                    containerColor = if (isSystemInDarkTheme()) Color.White
+                    else Color.Black
                 ),
                 modifier = Modifier
                     .padding(horizontal = 8.dp),
@@ -393,7 +470,8 @@ fun ResetPasswordField(
             ) {
                 Text(
                     "Reset Password",
-                    color = Color.White,
+                    color = if (isSystemInDarkTheme()) Color.Black
+                    else Color.White,
                     modifier = Modifier.padding(horizontal = 8.dp)
                 )
             }

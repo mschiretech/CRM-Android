@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
@@ -63,14 +64,14 @@ fun Sign_in_view(
     navController: NavController,
     // viewModel: SignInViewModel
 ) {
-    var userName by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isPasswordVisible by remember { mutableStateOf(false) }
     var showDialog by remember { mutableStateOf(false) }
 
 
     val isUserExist by remember {
-        derivedStateOf { isUserExist(userName, password) }
+        derivedStateOf { isUserExist(email, password) }
     }
 
     Scaffold { paddingValues ->
@@ -107,18 +108,18 @@ fun Sign_in_view(
             )
             Spacer(modifier = Modifier.height(32.dp))
 
-            //UserName Test Field
+            //Email Test Field
             OutlinedTextField(
-                value = userName,
-                onValueChange = { userName = it },
-                label = { Text("Username", fontStyle = FontStyle.Italic) },
+                value = email,
+                onValueChange = { email = it },
+                label = { Text("Email", fontStyle = FontStyle.Italic) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 shape = RoundedCornerShape(24.dp),
                 leadingIcon = {
                     Icon(
-                        Icons.Default.Person,
-                        contentDescription = "Password Icon",
+                        Icons.Default.Email,
+                        contentDescription = "Email Icon",
                         tint = if (isSystemInDarkTheme()) Color.White
                         else Color.Black
                     )
@@ -205,7 +206,7 @@ fun Sign_in_view(
                 showDialog = showDialog,
                 onDismiss = { showDialog = false },
                 title = "Error",
-                message = "Invalid username or password"
+                message = "Invalid Email or password"
             )
 
             Spacer(Modifier.height(24.dp))
@@ -216,7 +217,7 @@ fun Sign_in_view(
                         //navController.navigate(OnboardingScreens.Home.route)
                     } else {
                         showDialog = true
-                        userName = ""
+                        email = ""
                         password = ""
                     }
                 },
