@@ -1,7 +1,6 @@
-package com.mschiretech.crm_android.splash_and_authentication
+package com.mschiretech.crm_android.Onboarding
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.animateFloatAsState

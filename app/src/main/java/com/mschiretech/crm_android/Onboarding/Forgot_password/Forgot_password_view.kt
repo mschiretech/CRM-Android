@@ -1,4 +1,4 @@
-package com.mschiretech.crm_android.splash_and_authentication.Forgot_password
+package com.mschiretech.crm_android.Onboarding.Forgot_password
 
 import android.content.res.Configuration
 import androidx.compose.foundation.Image
@@ -13,10 +13,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
@@ -45,6 +46,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
@@ -76,6 +78,10 @@ fun Forgot_password_view(
     var showResetPasswordSection by remember { mutableStateOf(false) }
     var isEmailTouched by remember { mutableStateOf(false) }
 
+    val scrollState = rememberScrollState()
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+
     var showDialog by remember { mutableStateOf(false) }
 
     val isEmailValid by remember {
@@ -102,11 +108,15 @@ fun Forgot_password_view(
     ){ paddingValues ->
         Column(
             modifier = Modifier
+                .fillMaxSize()
                 .background(
                     if (isSystemInDarkTheme()) Color(0x86020221)
                     else Color(0xFF8690CC)
                 )
-                .fillMaxSize()
+                .then(
+                    if (isLandscape) Modifier.verticalScroll(scrollState)
+                    else Modifier
+                )
                 .padding(paddingValues)
                 .padding(horizontal = 24.dp),
         ) {
@@ -480,7 +490,7 @@ fun ResetPasswordField(
 }
 
 
-@Preview()
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Composable
 fun Forgot_password_ScreenPreview() {
     Forgot_password_view(navController = rememberNavController())

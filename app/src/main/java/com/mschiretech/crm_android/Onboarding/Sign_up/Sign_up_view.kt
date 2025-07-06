@@ -1,4 +1,4 @@
-package com.mschiretech.crm_android.splash_and_authentication.Sign_up
+package com.mschiretech.crm_android.Onboarding.Sign_up
 
 import android.content.res.Configuration
 import androidx.compose.foundation.Image
@@ -15,8 +15,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
@@ -45,6 +47,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -84,6 +87,11 @@ fun Sign_up_view(
 
     var showDialog by remember { mutableStateOf(false) }
 
+    val scrollState = rememberScrollState()
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+
+
     // Derived states for validation
     val isEmailValid by remember {
         derivedStateOf { isValidEmail(email) }
@@ -116,11 +124,16 @@ fun Sign_up_view(
     Scaffold(modifier = Modifier.fillMaxSize()) { paddingValues ->
         Column(
             modifier = Modifier
+                .fillMaxSize()
                 .background(
                     if (isSystemInDarkTheme()) Color(0x86020221)
                     else Color(0xFF8690CC)
                 )
-                .fillMaxSize()
+                .then(
+                    if (isLandscape) Modifier.verticalScroll(scrollState)
+                    else Modifier
+                )
+
                 .padding(paddingValues)
                 .padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -368,7 +381,7 @@ fun Sign_up_view(
                     Button(
                         onClick = {
                             if (isFormValid) {
-                               //userExists = true for now
+                                //userExists = true for now
                                 if (isUserExist) {
                                     navController.popBackStack()
                                 } else {
@@ -444,8 +457,11 @@ fun Sign_up_view(
 
 @Composable
 fun SocialLoginButton(icon: Painter, text: String) {
+    var showDialog by remember { mutableStateOf(false) }
     OutlinedButton(
-        onClick = { /* Handle login */ },
+        onClick = {
+            showDialog = true
+        },
         modifier = Modifier
             .fillMaxWidth()
             .height(50.dp)
@@ -456,6 +472,12 @@ fun SocialLoginButton(icon: Painter, text: String) {
             containerColor = Color.White
         )
     ) {
+//        Dialog(
+//            showDialog = showDialog,
+//            onDismiss = { showDialog = false },
+//            title = "Not Available",
+//            message = "This option is not available for mow !!"
+//        )
         Row(verticalAlignment = Alignment.CenterVertically) {
             Image(
                 painter = icon,

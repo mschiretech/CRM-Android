@@ -1,4 +1,4 @@
-package com.mschiretech.crm_android.splash_and_authentication.Sign_in
+package com.mschiretech.crm_android.Onboarding.Sign_in
 
 import android.content.res.Configuration
 import androidx.compose.foundation.Image
@@ -15,12 +15,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
@@ -43,6 +44,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -69,19 +71,28 @@ fun Sign_in_view(
     var isPasswordVisible by remember { mutableStateOf(false) }
     var showDialog by remember { mutableStateOf(false) }
 
+    val scrollState = rememberScrollState()
+    val configuration = LocalConfiguration.current
+
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+
 
     val isUserExist by remember {
         derivedStateOf { isUserExist(email, password) }
     }
 
-    Scaffold { paddingValues ->
+    Scaffold{ paddingValues ->
         Column(
             modifier = Modifier
+                .fillMaxSize()
                 .background(
                     if (isSystemInDarkTheme()) Color(0x86020221)
                     else Color(0xFF8690CC)
                 )
-                .fillMaxSize()
+                .then(
+                    if (isLandscape) Modifier.verticalScroll(scrollState)
+                    else Modifier
+                )
                 .padding(paddingValues)
                 .padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -215,6 +226,7 @@ fun Sign_in_view(
                     //isUserExist = false for now
                     if (isUserExist) {
                         //navController.navigate(OnboardingScreens.Home.route)
+                        //Adda toast if login is successful
                     } else {
                         showDialog = true
                         email = ""
@@ -227,7 +239,8 @@ fun Sign_in_view(
                 ),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Sign In")
+                Text("Sign In", color = if (isSystemInDarkTheme()) Color.Black
+                else Color.White)
             }
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -292,8 +305,11 @@ fun Sign_in_view(
 
 @Composable
 fun SocialLoginButton(icon: Painter, text: String) {
+    var showDialog by remember { mutableStateOf(false) }
     OutlinedButton(
-        onClick = { /* Handle login */ },
+        onClick = {
+            showDialog = true
+        },
         modifier = Modifier
             .fillMaxWidth()
             .height(50.dp)
@@ -304,6 +320,12 @@ fun SocialLoginButton(icon: Painter, text: String) {
             containerColor = Color.White
         )
     ) {
+//        Dialog(
+//            showDialog = showDialog,
+//            onDismiss = { showDialog = false },
+//            title = "Not Available",
+//            message = "This option is not available for mow !!"
+//        )
         Row(verticalAlignment = Alignment.CenterVertically) {
             Image(
                 painter = icon,

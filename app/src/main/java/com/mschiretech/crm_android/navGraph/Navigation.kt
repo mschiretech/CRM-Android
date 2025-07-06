@@ -4,10 +4,10 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.mschiretech.crm_android.splash_and_authentication.Forgot_password.Forgot_password_view
-import com.mschiretech.crm_android.splash_and_authentication.Sign_in.Sign_in_view
-import com.mschiretech.crm_android.splash_and_authentication.Sign_up.Sign_up_view
-import com.mschiretech.crm_android.splash_and_authentication.SplashScreen
+import com.mschiretech.crm_android.Onboarding.Forgot_password.Forgot_password_view
+import com.mschiretech.crm_android.Onboarding.Sign_in.Sign_in_view
+import com.mschiretech.crm_android.Onboarding.Sign_up.Sign_up_view
+import com.mschiretech.crm_android.Onboarding.SplashScreen
 
 @Composable
 fun Navigation(navController: NavHostController){

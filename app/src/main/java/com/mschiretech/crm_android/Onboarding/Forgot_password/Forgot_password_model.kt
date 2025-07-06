@@ -1,4 +1,4 @@
-package com.mschiretech.crm_android.splash_and_authentication.Forgot_password
+package com.mschiretech.crm_android.Onboarding.Forgot_password
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
