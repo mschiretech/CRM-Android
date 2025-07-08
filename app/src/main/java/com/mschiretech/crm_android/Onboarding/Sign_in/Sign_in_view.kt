@@ -1,5 +1,6 @@
 package com.mschiretech.crm_android.Onboarding.Sign_in
 
+import SocialLoginButton
 import android.content.res.Configuration
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -34,6 +35,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -45,6 +47,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -58,14 +61,38 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.mschiretech.crm_android.R
 import com.mschiretech.crm_android.dialogs.Dialog
-import com.mschiretech.crm_android.navGraph.OnboardingScreens
+import com.mschiretech.crm_android.Onboarding.navGraph.OnboardingScreens
+import com.mschiretech.crm_android.core.internet.NetworkState
+import com.mschiretech.crm_android.core.internet.observeNetworkState
+import com.mschiretech.crm_android.customer.navigation.CustomerScreens
+import com.mschiretech.crm_android.dialogs.NoInternetDialog
+import com.mschiretech.crm_android.ui.theme.accent
+import com.mschiretech.crm_android.ui.theme.borderDark
+import com.mschiretech.crm_android.ui.theme.borderLight
+import com.mschiretech.crm_android.ui.theme.cardDark
+import com.mschiretech.crm_android.ui.theme.cardLight
+import com.mschiretech.crm_android.ui.theme.navy
+import com.mschiretech.crm_android.ui.theme.peach
+import com.mschiretech.crm_android.ui.theme.textDark
+import com.mschiretech.crm_android.ui.theme.textLight
 import com.mschiretech.crm_android.varifications.userFinder.isUserExist
-
 @Composable
 fun Sign_in_view(
     navController: NavController,
-    // viewModel: SignInViewModel
+    onLoginSuccess: (String) -> Unit = {},
 ) {
+    //Colors
+    val isDark = isSystemInDarkTheme()
+    val backgroundColor = if (isDark) navy else peach
+    val textColor = if (isDark) textDark else textLight
+    val borderColor = if (isDark) borderDark else borderLight
+    val labelColor = borderColor
+    val buttonBg = accent
+    val buttonText = Color.White
+    val iconColor =  if (isSystemInDarkTheme()) Color.White else Color.Black
+    val dividerColor = if (isSystemInDarkTheme()) Color.White else Color.Black
+
+
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isPasswordVisible by remember { mutableStateOf(false) }
@@ -73,38 +100,39 @@ fun Sign_in_view(
 
     val scrollState = rememberScrollState()
     val configuration = LocalConfiguration.current
-
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
+    //Internet
+    val context = LocalContext.current
+    val networkState by context.observeNetworkState().collectAsState(initial = NetworkState.Unavailable)
+    var showNoInternetDialog by remember { mutableStateOf(true) }
+
+    if (networkState == NetworkState.Lost) showNoInternetDialog = true
+    if (networkState == NetworkState.Available) showNoInternetDialog = false
 
     val isUserExist by remember {
-        derivedStateOf { isUserExist(email, password) }
+        derivedStateOf { isUserExist(email.trim(), password) }
     }
 
-    Scaffold{ paddingValues ->
+    Scaffold { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(
-                    if (isSystemInDarkTheme()) Color(0x86020221)
-                    else Color(0xFF8690CC)
-                )
-                .then(
-                    if (isLandscape) Modifier.verticalScroll(scrollState)
-                    else Modifier
-                )
+                .background(backgroundColor)
+                .verticalScroll(scrollState)
                 .padding(paddingValues)
                 .padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // App logo
             Image(
                 painter = painterResource(R.drawable.app),
                 contentDescription = "App Logo",
                 modifier = Modifier.size(120.dp)
             )
+
             Spacer(Modifier.height(24.dp))
+
             Text(
                 "Welcome Back !!",
                 style = MaterialTheme.typography.headlineMedium.copy(
@@ -112,14 +140,13 @@ fun Sign_in_view(
                     fontWeight = FontWeight.Bold
                 )
             )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                "Good to see you again !!",
-                style = MaterialTheme.typography.bodyLarge
-            )
-            Spacer(modifier = Modifier.height(32.dp))
 
-            //Email Test Field
+            Spacer(Modifier.height(8.dp))
+            Text("Good to see you again !!", style = MaterialTheme.typography.bodyLarge)
+
+            Spacer(Modifier.height(32.dp))
+
+            // Email Field
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
@@ -128,90 +155,70 @@ fun Sign_in_view(
                 singleLine = true,
                 shape = RoundedCornerShape(24.dp),
                 leadingIcon = {
-                    Icon(
-                        Icons.Default.Email,
-                        contentDescription = "Email Icon",
-                        tint = if (isSystemInDarkTheme()) Color.White
-                        else Color.Black
-                    )
+                    Icon(Icons.Default.Email, contentDescription = null, tint = iconColor)
                 },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = if (isSystemInDarkTheme()) Color.White
-                    else Color.Black,
-                    unfocusedBorderColor = if (isSystemInDarkTheme()) Color.White
-                    else Color.Black,
-                    cursorColor = if (isSystemInDarkTheme()) Color.White
-                    else Color.Black,
-                    focusedLabelColor = if (isSystemInDarkTheme()) Color.White
-                    else Color.Black,
-                    unfocusedLabelColor = if (isSystemInDarkTheme()) Color.White
-                    else Color.Black,
+                    focusedBorderColor = borderColor,
+                    unfocusedBorderColor = borderColor,
+                    cursorColor = borderColor,
+                    focusedLabelColor = labelColor,
+                    unfocusedLabelColor = labelColor
                 )
             )
 
             Spacer(Modifier.height(8.dp))
 
-            //Password Text Filled
+            // Password Field
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
                 label = { Text("Password", fontStyle = FontStyle.Italic) },
                 modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                shape = RoundedCornerShape(24.dp),
                 leadingIcon = {
-                    Icon(
-                        Icons.Default.Lock,
-                        contentDescription = "Password Icon",
-                        tint = if (isSystemInDarkTheme()) Color.White
-                        else Color.Black,
-                    )
+                    Icon(Icons.Default.Lock, contentDescription = null, tint = iconColor)
                 },
-                visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(), // Show/hide password
                 trailingIcon = {
-                    IconButton(onClick = {
-                        isPasswordVisible = !isPasswordVisible
-                    }) {
+                    IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
                         Image(
-                            painter = painterResource(id = if (isPasswordVisible) R.drawable.visibility else R.drawable.visibility_off),
-                            contentDescription = "Toggle Password Visibility",
+                            painter = painterResource(
+                                if (isPasswordVisible) R.drawable.visibility else R.drawable.visibility_off
+                            ),
+                            contentDescription = "Toggle Visibility",
                             modifier = Modifier.size(24.dp),
-                            colorFilter = ColorFilter.tint(
-                                if (isSystemInDarkTheme()) Color.White
-                                else Color.Black,
-                            )
+                            colorFilter = ColorFilter.tint(iconColor)
                         )
                     }
                 },
-
+                visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                singleLine = true,
-                shape = RoundedCornerShape(24.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = if (isSystemInDarkTheme()) Color.White
-                    else Color.Black,
-                    unfocusedBorderColor = if (isSystemInDarkTheme()) Color.White
-                    else Color.Black,
-                    cursorColor = if (isSystemInDarkTheme()) Color.White
-                    else Color.Black,
-                    focusedLabelColor = if (isSystemInDarkTheme()) Color.White
-                    else Color.Black,
-                    unfocusedLabelColor = if (isSystemInDarkTheme()) Color.White
-                    else Color.Black,
+                    focusedBorderColor = borderColor,
+                    unfocusedBorderColor = borderColor,
+                    cursorColor = borderColor,
+                    focusedLabelColor = labelColor,
+                    unfocusedLabelColor = labelColor
                 )
             )
+
             Text(
                 "Forgot Password?",
-                style = MaterialTheme.typography.bodyMedium,
-                textDecoration = TextDecoration.Underline,
-                color = Color(0xFFFF0000),
                 modifier = Modifier
-                    .padding(top = 8.dp)
+                    .padding(top = 8.dp, bottom = 16.dp)
                     .align(Alignment.Start)
-                    .padding(bottom = 16.dp)
                     .clickable {
                         navController.navigate(OnboardingScreens.Forgot_password.route)
-                    }
+                    },
+                textDecoration = TextDecoration.Underline,
+                color = Color.Red,
+                style = MaterialTheme.typography.bodyMedium
             )
+
+            if (showNoInternetDialog) {
+                NoInternetDialog(showDialog = showNoInternetDialog, onDismissRequest = { showNoInternetDialog = false })
+            }
 
             Dialog(
                 showDialog = showDialog,
@@ -221,82 +228,64 @@ fun Sign_in_view(
             )
 
             Spacer(Modifier.height(24.dp))
+
             Button(
                 onClick = {
-                    //isUserExist = false for now
                     if (isUserExist) {
-                        //navController.navigate(OnboardingScreens.Home.route)
-                        //Adda toast if login is successful
+                        navController.navigate(CustomerScreens.Dashboard.route) {
+                            popUpTo(0) { inclusive = true }
+                        }
                     } else {
                         showDialog = true
                         email = ""
                         password = ""
                     }
                 },
-                colors = ButtonDefaults.buttonColors(
-                    if (isSystemInDarkTheme()) Color.White
-                    else Color.Black,
-                ),
+                colors = ButtonDefaults.buttonColors(containerColor = buttonBg),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Sign In", color = if (isSystemInDarkTheme()) Color.Black
-                else Color.White)
+                Text("Sign In", color = buttonText)
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(Modifier.height(12.dp))
+
+            // OR Divider
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .width(24.dp)
-                    .padding(16.dp),
+                modifier = Modifier.fillMaxWidth().padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Divider(
-                    color = if (isSystemInDarkTheme()) Color.White
-                    else Color.Black,
-                    modifier = Modifier.weight(1f)
+                Divider(color = dividerColor, modifier = Modifier.weight(1f))
+                Text("Or", modifier = Modifier.padding(horizontal = 16.dp))
+                Divider(color = dividerColor, modifier = Modifier.weight(1f))
+            }
+
+            Spacer(Modifier.height(12.dp))
+            Row (
+                modifier = Modifier.fillMaxWidth().padding(8.dp),
+                horizontalArrangement = Arrangement.Center
+            ){
+                SocialLoginButton(
+                    icon = painterResource(id = R.drawable.google),
+                    text = "Google"
                 )
-                Text(
-                    "Or",
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
-                Divider(
-                    color = if (isSystemInDarkTheme()) Color.White
-                    else Color.Black,
-                    modifier = Modifier.weight(1f)
+
+                SocialLoginButton(
+                    icon = painterResource(id = R.drawable.github),
+                    text = "Github"
                 )
             }
-            Spacer(modifier = Modifier.height(12.dp))
-
-            SocialLoginButton(
-                icon = painterResource(id = R.drawable.google),
-                text = "Continue with Google"
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            SocialLoginButton(
-                icon = painterResource(id = R.drawable.github),
-                text = "Continue with Github"
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(Modifier.height(24.dp))
 
             Row {
-                Text(
-                    "Don’t have an account? ",
-                    color = if (isSystemInDarkTheme()) Color.White
-                    else Color.Black
-                )
+                Text("Don’t have an account? ", color = textColor)
                 Text(
                     "Sign up",
-                    textDecoration = TextDecoration.Underline,
-                    color = Color.Blue,
-                    fontWeight = FontWeight.Bold,
                     modifier = Modifier.clickable {
                         navController.navigate(OnboardingScreens.Sign_up.route)
-                    }
+                    },
+                    color = Color.Blue,
+                    textDecoration = TextDecoration.Underline,
+                    fontWeight = FontWeight.Bold
                 )
             }
         }
@@ -342,12 +331,12 @@ fun SocialLoginButton(icon: Painter, text: String) {
 @Preview()
 @Composable
 fun SplashScreenPreview() {
-    Sign_in_view(navController = rememberNavController())
+    Sign_in_view(navController = rememberNavController(),)
 }
 
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun SplashScreenDarkPreview() {
-    Sign_in_view(navController = rememberNavController())
+    Sign_in_view(navController = rememberNavController(),)
 }

@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.mschiretech.crm_android.R
-import com.mschiretech.crm_android.navGraph.OnboardingScreens
+import com.mschiretech.crm_android.Onboarding.navGraph.OnboardingScreens
 import kotlinx.coroutines.delay
 
 @Composable

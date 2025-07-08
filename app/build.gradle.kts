@@ -71,6 +71,7 @@ dependencies {
     implementation("androidx.transition:transition:1.4.1")
     implementation("androidx.compose.animation:animation:1.6.7") // If using Compose
 
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

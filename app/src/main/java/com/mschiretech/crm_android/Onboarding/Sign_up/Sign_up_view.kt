@@ -1,9 +1,9 @@
-package com.mschiretech.crm_android.Onboarding.Sign_up
 
 import android.content.res.Configuration
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -37,6 +37,8 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -44,10 +46,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -57,21 +61,44 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.mschiretech.crm_android.Onboarding.navGraph.OnboardingScreens
 import com.mschiretech.crm_android.R
+import com.mschiretech.crm_android.core.internet.NetworkState
+import com.mschiretech.crm_android.core.internet.observeNetworkState
 import com.mschiretech.crm_android.dialogs.Dialog
-import com.mschiretech.crm_android.navGraph.OnboardingScreens
+import com.mschiretech.crm_android.dialogs.NoInternetDialog
+import com.mschiretech.crm_android.ui.theme.accent
+import com.mschiretech.crm_android.ui.theme.borderDark
+import com.mschiretech.crm_android.ui.theme.borderLight
+import com.mschiretech.crm_android.ui.theme.cardDark
+import com.mschiretech.crm_android.ui.theme.cardLight
+import com.mschiretech.crm_android.ui.theme.navy
+import com.mschiretech.crm_android.ui.theme.peach
+import com.mschiretech.crm_android.ui.theme.textDark
+import com.mschiretech.crm_android.ui.theme.textLight
 import com.mschiretech.crm_android.varifications.email.isValidEmail
 import com.mschiretech.crm_android.varifications.password.getPasswordStrengthMessage
 import com.mschiretech.crm_android.varifications.password.isStrongPassword
-import com.mschiretech.crm_android.varifications.userFinder.isNewUserExist
-
 @Composable
 fun Sign_up_view(
     navController: NavController,
-    // viewModel: SignUpViewModel
+    viewModel: UserViewModel = viewModel()
 ) {
+    //Colors
+    val dividerColor = if (isSystemInDarkTheme()) Color.White else Color.Black
+    val isDark = isSystemInDarkTheme()
+    val backgroundColor = if (isDark) navy else peach
+    val cardColor = if (isDark) cardDark else cardLight
+    val textColor = if (isDark) textDark else textLight
+    val borderColor = if (isDark) borderDark else borderLight
+    val labelColor = borderColor
+    val buttonBg = accent
+    val buttonText = Color.White
+
+
     var fullName by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -86,11 +113,21 @@ fun Sign_up_view(
     var isConfirmPasswordTouched by remember { mutableStateOf(false) }
 
     var showDialog by remember { mutableStateOf(false) }
+    var dialogTitle by remember { mutableStateOf("") }
+    var dialogMessage by remember { mutableStateOf("") }
 
-    val scrollState = rememberScrollState()
-    val configuration = LocalConfiguration.current
-    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+//    //Orientation Finder
+      val scrollState = rememberScrollState()
+//    val configuration = LocalConfiguration.current
+//    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
+    // Collecting all relevant states from ViewModel
+    val postResult by viewModel.postResult.collectAsState()
+
+    //Internet Connection Status and dialog
+    val context = LocalContext.current
+    val networkState by context.observeNetworkState().collectAsState(initial = NetworkState.Unavailable)
+    var showNoInternetDialog by remember { mutableStateOf(true) }
 
     // Derived states for validation
     val isEmailValid by remember {
@@ -108,32 +145,47 @@ fun Sign_up_view(
     val isFullNameValid by remember {
         derivedStateOf { fullName.trim().length >= 2 }
     }
-    val isUserExist by remember {
-        derivedStateOf { !isNewUserExist(fullName, email) }
-    }
 
     val isFormValid by remember {
         derivedStateOf {
             isFullNameValid &&
                     isEmailValid &&
                     isPasswordStrong &&
-                    isPasswordMatch
+                    isPasswordMatch &&
+                    !showNoInternetDialog
         }
+    }
+
+    // Handle ViewModel state changes
+    LaunchedEffect(postResult) {
+        if (postResult.isNotEmpty()) {
+            if (postResult.startsWith("User Created:")) {
+                // Success case
+                dialogTitle = "Success"
+                dialogMessage = "Account created successfully!"
+                showDialog = true
+            } else if (postResult.startsWith("Post Error:")) {
+                // Error case
+                dialogTitle = "Error"
+                dialogMessage = postResult.removePrefix("Post Error: ")
+                showDialog = true
+            }
+        }
+    }
+
+    if(networkState == NetworkState.Lost){
+        showNoInternetDialog = true
+    }
+    if(networkState == NetworkState.Available){
+        showNoInternetDialog = false
     }
 
     Scaffold(modifier = Modifier.fillMaxSize()) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(
-                    if (isSystemInDarkTheme()) Color(0x86020221)
-                    else Color(0xFF8690CC)
-                )
-                .then(
-                    if (isLandscape) Modifier.verticalScroll(scrollState)
-                    else Modifier
-                )
-
+                .background(backgroundColor)
+                .verticalScroll(scrollState)
                 .padding(paddingValues)
                 .padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -151,18 +203,15 @@ fun Sign_up_view(
                 style = MaterialTheme.typography.headlineMedium.copy(
                     fontStyle = FontStyle.Italic,
                     fontWeight = FontWeight.Bold
-                )
+                ),
+                color = textColor
             )
             Spacer(modifier = Modifier.height(8.dp))
 
             Card(
                 elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
-                colors = CardDefaults.cardColors(
-                    if (isSystemInDarkTheme()) Color(0xFC171736)
-                    else Color(0xF7919DE7)
-                ),
+                colors = CardDefaults.cardColors(cardColor),
                 shape = RoundedCornerShape(24.dp)
-//                modifier = Modifier.padding(16.dp)
             ) {
                 Column(
                     modifier = Modifier.padding(vertical = 8.dp),
@@ -188,18 +237,13 @@ fun Sign_up_view(
                         },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = if (isSystemInDarkTheme()) Color.White
-                            else Color.Black,
-                            unfocusedBorderColor = if (isSystemInDarkTheme()) Color.White
-                            else Color.Black,
-                            cursorColor = if (isSystemInDarkTheme()) Color.White
-                            else Color.Black,
-                            focusedLabelColor = if (isSystemInDarkTheme()) Color.White
-                            else Color.Black,
-                            unfocusedLabelColor = if (isSystemInDarkTheme()) Color.White
-                            else Color.Black,
+                            focusedBorderColor = borderColor,
+                            unfocusedBorderColor = borderColor,
+                            cursorColor = borderColor,
+                            focusedLabelColor = labelColor,
+                            unfocusedLabelColor = labelColor,
                         ),
-                        //Show error only if touched and invalid
+                        enabled = true,
                         isError = isFullNameTouched && !isFullNameValid,
                         supportingText = if (isFullNameTouched && !isFullNameValid) {
                             {
@@ -210,7 +254,8 @@ fun Sign_up_view(
                             }
                         } else null
                     )
-                    //Email text field
+
+                    // Email text field
                     OutlinedTextField(
                         value = email,
                         onValueChange = {
@@ -230,18 +275,13 @@ fun Sign_up_view(
                         singleLine = true,
                         shape = RoundedCornerShape(24.dp),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = if (isSystemInDarkTheme()) Color.White
-                            else Color.Black,
-                            unfocusedBorderColor = if (isSystemInDarkTheme()) Color.White
-                            else Color.Black,
-                            cursorColor = if (isSystemInDarkTheme()) Color.White
-                            else Color.Black,
-                            focusedLabelColor = if (isSystemInDarkTheme()) Color.White
-                            else Color.Black,
-                            unfocusedLabelColor = if (isSystemInDarkTheme()) Color.White
-                            else Color.Black,
+                            focusedBorderColor = borderColor,
+                            unfocusedBorderColor = borderColor,
+                            cursorColor = borderColor,
+                            focusedLabelColor = labelColor,
+                            unfocusedLabelColor = labelColor,
                         ),
-                        //Show error only if touched and invalid
+                        enabled = true,
                         isError = isEmailTouched && email.isNotEmpty() && !isEmailValid,
                         supportingText = if (isEmailTouched && email.isNotEmpty() && !isEmailValid) {
                             {
@@ -252,6 +292,9 @@ fun Sign_up_view(
                             }
                         } else null
                     )
+                    if (showNoInternetDialog) {
+                        NoInternetDialog(showDialog = showNoInternetDialog, onDismissRequest ={ showNoInternetDialog = false })
+                    }
                     // Password Text Field
                     OutlinedTextField(
                         value = password,
@@ -284,22 +327,17 @@ fun Sign_up_view(
                                 )
                             }
                         },
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = borderColor,
+                            unfocusedBorderColor = borderColor,
+                            cursorColor = borderColor,
+                            focusedLabelColor = labelColor,
+                            unfocusedLabelColor = labelColor,
+                        ),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                         singleLine = true,
                         shape = RoundedCornerShape(24.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = if (isSystemInDarkTheme()) Color.White
-                            else Color.Black,
-                            unfocusedBorderColor = if (isSystemInDarkTheme()) Color.White
-                            else Color.Black,
-                            cursorColor = if (isSystemInDarkTheme()) Color.White
-                            else Color.Black,
-                            focusedLabelColor = if (isSystemInDarkTheme()) Color.White
-                            else Color.Black,
-                            unfocusedLabelColor = if (isSystemInDarkTheme()) Color.White
-                            else Color.Black,
-                        ),
-                        //Show error only if touched and password is not empty but weak
+                        enabled = true,
                         isError = isPasswordTouched && password.isNotEmpty() && !isPasswordStrong,
                         supportingText = if (isPasswordTouched && password.isNotEmpty() && !isPasswordStrong) {
                             {
@@ -310,6 +348,7 @@ fun Sign_up_view(
                             }
                         } else null
                     )
+
                     // Confirm Password text field
                     OutlinedTextField(
                         value = confirmPassword,
@@ -332,7 +371,7 @@ fun Sign_up_view(
                                 isConfirmPasswordVisible = !isConfirmPasswordVisible
                             }) {
                                 Image(
-                                    painter = painterResource(id = if (isPasswordVisible) R.drawable.visibility else R.drawable.visibility_off),
+                                    painter = painterResource(id = if (isConfirmPasswordVisible) R.drawable.visibility else R.drawable.visibility_off),
                                     contentDescription = "Toggle Password Visibility",
                                     modifier = Modifier.size(24.dp),
                                     colorFilter = ColorFilter.tint(
@@ -346,18 +385,13 @@ fun Sign_up_view(
                         singleLine = true,
                         shape = RoundedCornerShape(24.dp),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = if (isSystemInDarkTheme()) Color.White
-                            else Color.Black,
-                            unfocusedBorderColor = if (isSystemInDarkTheme()) Color.White
-                            else Color.Black,
-                            cursorColor = if (isSystemInDarkTheme()) Color.White
-                            else Color.Black,
-                            focusedLabelColor = if (isSystemInDarkTheme()) Color.White
-                            else Color.Black,
-                            unfocusedLabelColor = if (isSystemInDarkTheme()) Color.White
-                            else Color.Black,
+                            focusedBorderColor = borderColor,
+                            unfocusedBorderColor = borderColor,
+                            cursorColor = borderColor,
+                            focusedLabelColor = labelColor,
+                            unfocusedLabelColor = labelColor,
                         ),
-                        // Show error only if touched and passwords don't match
+                        enabled = true,
                         isError = isConfirmPasswordTouched && confirmPassword.isNotEmpty() && !isPasswordMatch,
                         supportingText = if (isConfirmPasswordTouched && confirmPassword.isNotEmpty() && !isPasswordMatch) {
                             {
@@ -372,74 +406,81 @@ fun Sign_up_view(
 
                     Dialog(
                         showDialog = showDialog,
-                        onDismiss = { showDialog = false },
-                        title = "Error",
-                        message = "User already exists"
+                        onDismiss = {
+                            showDialog = false
+                            // Handle post-dialog actions
+                            if (postResult.startsWith("User Created:")) {
+                                // Navigate to login screen on success
+                                navController.navigate(OnboardingScreens.Sign_in.route) {
+                                    popUpTo(OnboardingScreens.Sign_up.route) { inclusive = true }
+                                }
+                            }
+                        },
+                        title = dialogTitle,
+                        message = dialogMessage
                     )
 
-                    // Color will change  if the form is valid
+                    // Sign Up Button
                     Button(
                         onClick = {
-                            if (isFormValid) {
-                                //userExists = true for now
-                                if (isUserExist) {
-                                    navController.popBackStack()
-                                } else {
-                                    showDialog = true
-                                }
-                                //TODO: Add a toast that "you have signed up successfully"
+                            if (true) {
+                                viewModel.createUser(
+                                    name = fullName.trim(),
+                                    username = fullName.trim(), // or generate username differently
+                                    email = email.trim(),
+                                    password = password
+                                )
                             }
                         },
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = if (isSystemInDarkTheme()) Color.White
-                            else Color.Black
+                            containerColor = buttonBg
                         ),
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 8.dp),
                         enabled = isFormValid
                     ) {
-                        Text("Sign Up", color = Color.White)
+                        Text("Sign Up", color =buttonText)
                     }
                 }
             }
 
+            // Rest of your UI remains the same...
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Divider(
-                    color = Color.Black,
-                    modifier = Modifier.weight(1f)
-                )
+
+                Divider(color = dividerColor, modifier = Modifier.weight(1f))
                 Text(
                     "Or",
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
-                Divider(
-                    color = Color.Black,
-                    modifier = Modifier.weight(1f)
-                )
+
+                Divider(color = dividerColor, modifier = Modifier.weight(1f))
             }
 
-            SocialLoginButton(
-                icon = painterResource(id = R.drawable.google),
-                text = "Continue with Google"
-            )
+          Row (
+              modifier = Modifier.fillMaxWidth().padding(8.dp),
+              horizontalArrangement = Arrangement.Center
+          ){
+              SocialLoginButton(
+                  icon = painterResource(id = R.drawable.google),
+                  text = "Google"
+              )
 
-            Spacer(modifier = Modifier.height(12.dp))
-
-            SocialLoginButton(
-                icon = painterResource(id = R.drawable.github),
-                text = "Continue with Github"
-            )
+              SocialLoginButton(
+                  icon = painterResource(id = R.drawable.github),
+                  text = "Github"
+              )
+          }
             Spacer(modifier = Modifier.height(12.dp))
 
             Row {
-                Text("Already have an account? ", color = Color.Black)
+                Text("Already have an account? ", color =textColor)
                 Text(
                     "Sign in",
                     textDecoration = TextDecoration.Underline,
@@ -463,21 +504,20 @@ fun SocialLoginButton(icon: Painter, text: String) {
             showDialog = true
         },
         modifier = Modifier
-            .fillMaxWidth()
             .height(50.dp)
-            .padding(horizontal = 24.dp),
+            .padding(horizontal = 8.dp),
         shape = RoundedCornerShape(50),
         colors = ButtonDefaults.outlinedButtonColors(
             contentColor = Color.Black,
             containerColor = Color.White
         )
     ) {
-//        Dialog(
-//            showDialog = showDialog,
-//            onDismiss = { showDialog = false },
-//            title = "Not Available",
-//            message = "This option is not available for mow !!"
-//        )
+        Dialog(
+            showDialog = showDialog,
+            onDismiss = { showDialog = false },
+            title = "Not Available",
+            message = "This option is not available for mow !!"
+        )
         Row(verticalAlignment = Alignment.CenterVertically) {
             Image(
                 painter = icon,
@@ -493,11 +533,11 @@ fun SocialLoginButton(icon: Painter, text: String) {
 @Preview()
 @Composable
 fun Sign_up_Preview() {
-    Sign_up_view(navController = rememberNavController())
+ Sign_up_view(navController = rememberNavController())
 }
 
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES,)
 @Composable
 fun Sign_up_DarkPreview() {
-    Sign_up_view(navController = rememberNavController())
+   Sign_up_view(navController = rememberNavController())
 }

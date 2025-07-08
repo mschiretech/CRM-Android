@@ -34,6 +34,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -47,6 +48,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
@@ -61,18 +63,39 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.mschiretech.crm_android.R
+import com.mschiretech.crm_android.core.internet.NetworkState
+import com.mschiretech.crm_android.core.internet.observeNetworkState
 import com.mschiretech.crm_android.dialogs.Dialog
+import com.mschiretech.crm_android.dialogs.NoInternetDialog
+import com.mschiretech.crm_android.ui.theme.accent
+import com.mschiretech.crm_android.ui.theme.borderDark
+import com.mschiretech.crm_android.ui.theme.borderLight
+import com.mschiretech.crm_android.ui.theme.navy
+import com.mschiretech.crm_android.ui.theme.peach
+import com.mschiretech.crm_android.ui.theme.textDark
+import com.mschiretech.crm_android.ui.theme.textLight
 import com.mschiretech.crm_android.varifications.email.isValidEmail
 import com.mschiretech.crm_android.varifications.otp.otp_verification
 import com.mschiretech.crm_android.varifications.password.getPasswordStrengthMessage
 import com.mschiretech.crm_android.varifications.password.isStrongPassword
 import com.mschiretech.crm_android.varifications.userFinder.isEmailExist
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Forgot_password_view(
     navController: NavController,
 ) {
+    //Colors
+    val isDark = isSystemInDarkTheme()
+    val backgroundColor = if (isDark) navy else peach
+    val textColor = if (isDark) textDark else textLight
+    val borderColor = if (isDark) borderDark else borderLight
+    val labelColor = borderColor
+    val buttonBg = accent
+    val buttonText = Color.White
+    val iconColor = if (isSystemInDarkTheme()) Color.White else Color.Black
+
     var email by remember { mutableStateOf("") }
     var showOptSection by remember { mutableStateOf(false) }
     var showResetPasswordSection by remember { mutableStateOf(false) }
@@ -81,6 +104,16 @@ fun Forgot_password_view(
     val scrollState = rememberScrollState()
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+
+
+    //Internet
+    val context = LocalContext.current
+    val networkState by context.observeNetworkState().collectAsState(initial = NetworkState.Unavailable)
+    var showNoInternetDialog by remember { mutableStateOf(true) }
+
+    if (networkState == NetworkState.Lost) showNoInternetDialog = true
+    if (networkState == NetworkState.Available) showNoInternetDialog = false
+
 
     var showDialog by remember { mutableStateOf(false) }
 
@@ -91,10 +124,10 @@ fun Forgot_password_view(
         derivedStateOf { isEmailExist(email) }
     }
 
-    Scaffold (
+    Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Forgot Password") },
+                title = { Text("Forgot Password", color = textColor) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
@@ -105,18 +138,12 @@ fun Forgot_password_view(
                 )
             )
         }
-    ){ paddingValues ->
+    ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(
-                    if (isSystemInDarkTheme()) Color(0x86020221)
-                    else Color(0xFF8690CC)
-                )
-                .then(
-                    if (isLandscape) Modifier.verticalScroll(scrollState)
-                    else Modifier
-                )
+                .background(backgroundColor)
+                .verticalScroll(scrollState)
                 .padding(paddingValues)
                 .padding(horizontal = 24.dp),
         ) {
@@ -126,7 +153,7 @@ fun Forgot_password_view(
                     style = MaterialTheme.typography.headlineMedium.copy(
                         fontWeight = FontWeight.Bold
                     ),
-                    color = MaterialTheme.colorScheme.onBackground
+                    color = textColor
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
@@ -137,6 +164,10 @@ fun Forgot_password_view(
             }
 
             Spacer(modifier = Modifier.height(32.dp))
+
+            if (showNoInternetDialog) {
+                NoInternetDialog(showDialog = showNoInternetDialog, onDismissRequest = { showNoInternetDialog = false })
+            }
 
             // Email text field
             Column(
@@ -154,8 +185,7 @@ fun Forgot_password_view(
                         Icon(
                             Icons.Default.Email,
                             contentDescription = "Email Icon",
-                            tint = if (isSystemInDarkTheme()) Color.White
-                            else Color.Black
+                            tint = iconColor
                         )
                     },
                     modifier = Modifier.fillMaxWidth(),
@@ -163,17 +193,12 @@ fun Forgot_password_view(
                     singleLine = true,
                     shape = RoundedCornerShape(24.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = if (isSystemInDarkTheme()) Color.White
-                        else Color.Black,
-                        unfocusedBorderColor = if (isSystemInDarkTheme()) Color.White
-                        else Color.Black,
-                        cursorColor = if (isSystemInDarkTheme()) Color.White
-                        else Color.Black,
-                        focusedLabelColor = if (isSystemInDarkTheme()) Color.White
-                        else Color.Black,
-                        unfocusedLabelColor = if (isSystemInDarkTheme()) Color.White
-                        else Color.Black,
-                    ),                    isError = isEmailTouched && email.isNotEmpty() && !isEmailValid,
+                        focusedBorderColor = borderColor,
+                        unfocusedBorderColor = borderColor,
+                        cursorColor = borderColor,
+                        focusedLabelColor = labelColor,
+                        unfocusedLabelColor = labelColor
+                    ), isError = isEmailTouched && email.isNotEmpty() && !isEmailValid,
                     supportingText = if (isEmailTouched && email.isNotEmpty() && !isEmailValid) {
                         {
                             Text(
@@ -202,8 +227,7 @@ fun Forgot_password_view(
                         }
                     },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (isSystemInDarkTheme()) Color.White
-                        else Color.Black
+                        containerColor = (buttonBg)
                     ),
                     modifier = Modifier
                         .padding(horizontal = 8.dp),
@@ -211,8 +235,7 @@ fun Forgot_password_view(
                 ) {
                     Text(
                         "Send OTP",
-                        color = if (isSystemInDarkTheme()) Color.Black
-                        else Color.White,
+                        color = buttonText,
                         modifier = Modifier.padding(horizontal = 8.dp)
                     )
                 }
@@ -245,6 +268,14 @@ fun IndividualOTPTextFields(
     email: String,
     onOTPVerified: () -> Unit
 ) {
+    val isDark = isSystemInDarkTheme()
+    val borderColor = if (isDark) borderDark else borderLight
+    val labelColor = borderColor
+    val buttonBg = accent
+    val buttonText = Color.White
+    val textColor = if (isDark) textDark else textLight
+    val iconColor = if (isSystemInDarkTheme()) Color.White else Color.Black
+
     var showDialog by remember { mutableStateOf(false) }
     val otpLength = 6
     val otpValues = remember {
@@ -261,15 +292,18 @@ fun IndividualOTPTextFields(
         modifier = Modifier.fillMaxWidth(),
 
         ) {
-        Text("OTP sent to $email check your inbox.")
+        Text(
+            "OTP sent to $email check your inbox.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+        )
         Spacer(Modifier.height(16.dp))
         Text(
             "Enter OTP",
             style = MaterialTheme.typography.headlineSmall.copy(
                 fontWeight = FontWeight.Bold,
             ),
-            color = if (isSystemInDarkTheme()) Color.White
-            else Color.Black,
+            color =textColor,
         )
         Spacer(Modifier.height(16.dp))
         Column(
@@ -305,16 +339,11 @@ fun IndividualOTPTextFields(
                             .size(50.dp)
                             .focusRequester(focusRequesters[index]),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = if (isSystemInDarkTheme()) Color.White
-                            else Color.Black,
-                            unfocusedBorderColor = if (isSystemInDarkTheme()) Color.White
-                            else Color.Black,
-                            cursorColor = if (isSystemInDarkTheme()) Color.White
-                            else Color.Black,
-                            focusedLabelColor = if (isSystemInDarkTheme()) Color.White
-                            else Color.Black,
-                            unfocusedLabelColor = if (isSystemInDarkTheme()) Color.White
-                            else Color.Black,
+                            focusedBorderColor = borderColor,
+                            unfocusedBorderColor = borderColor,
+                            cursorColor = borderColor,
+                            focusedLabelColor = labelColor,
+                            unfocusedLabelColor = labelColor
                         ),
                     )
                 }
@@ -335,8 +364,7 @@ fun IndividualOTPTextFields(
                     } else showDialog = true
                 },
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = if (isSystemInDarkTheme()) Color.White
-                    else Color.Black
+                    containerColor =buttonBg
                 ),
                 modifier = Modifier
                     .padding(horizontal = 8.dp),
@@ -344,8 +372,7 @@ fun IndividualOTPTextFields(
             ) {
                 Text(
                     "Verify OTP",
-                    color = if (isSystemInDarkTheme()) Color.Black
-                    else Color.White,
+                    color = buttonText,
                     modifier = Modifier.padding(horizontal = 8.dp)
                 )
             }
@@ -357,6 +384,14 @@ fun IndividualOTPTextFields(
 fun ResetPasswordField(
     onPasswordReset: () -> Unit
 ) {
+    val isDark = isSystemInDarkTheme()
+    val borderColor = if (isDark) borderDark else borderLight
+    val labelColor = borderColor
+    val buttonBg = accent
+    val buttonText = Color.White
+    val textColor = if (isDark) textDark else textLight
+    val iconColor = if (isSystemInDarkTheme()) Color.White else Color.Black
+
     var password by remember { mutableStateOf("") }
     var isPasswordVisible by remember { mutableStateOf(false) }
     var isPasswordTouched by remember { mutableStateOf(false) }
@@ -375,7 +410,7 @@ fun ResetPasswordField(
             style = MaterialTheme.typography.headlineSmall.copy(
                 fontWeight = FontWeight.Bold
             ),
-            color = Color.Black
+            color =textColor
         )
         Spacer(Modifier.height(16.dp))
         Column(
@@ -394,8 +429,7 @@ fun ResetPasswordField(
                     Icon(
                         Icons.Default.Lock,
                         contentDescription = "Password Icon",
-                        tint = if (isSystemInDarkTheme()) Color.White
-                        else Color.Black
+                        tint = iconColor
                     )
                 },
                 visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -407,8 +441,9 @@ fun ResetPasswordField(
                             painter = painterResource(id = if (isPasswordVisible) R.drawable.visibility else R.drawable.visibility_off),
                             contentDescription = "Toggle Password Visibility",
                             modifier = Modifier.size(24.dp),
-                            colorFilter = ColorFilter.tint(if (isSystemInDarkTheme()) Color.White
-                            else Color.Black)
+                            colorFilter = ColorFilter.tint(
+                                iconColor
+                            )
                         )
                     }
                 },
@@ -416,16 +451,11 @@ fun ResetPasswordField(
                 singleLine = true,
                 shape = RoundedCornerShape(24.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = if (isSystemInDarkTheme()) Color.White
-                    else Color.Black,
-                    unfocusedBorderColor = if (isSystemInDarkTheme()) Color.White
-                    else Color.Black,
-                    cursorColor = if (isSystemInDarkTheme()) Color.White
-                    else Color.Black,
-                    focusedLabelColor = if (isSystemInDarkTheme()) Color.White
-                    else Color.Black,
-                    unfocusedLabelColor = if (isSystemInDarkTheme()) Color.White
-                    else Color.Black,
+                    focusedBorderColor = borderColor,
+                    unfocusedBorderColor = borderColor,
+                    cursorColor = borderColor,
+                    focusedLabelColor = labelColor,
+                    unfocusedLabelColor = labelColor
                 ),
                 isError = isPasswordTouched && password.isNotEmpty() && !isPasswordStrong,
                 supportingText = if (isPasswordTouched && password.isNotEmpty() && !isPasswordStrong) {
@@ -441,13 +471,10 @@ fun ResetPasswordField(
 
             Spacer(Modifier.height(24.dp))
 
-            //If password updated
-            var shouldNavigate by remember { mutableStateOf(false) }
-
             Dialog(
                 successDialog,
                 onDismiss = {
-                   successDialog = false
+                    successDialog = false
                 },
                 title = "Success",
                 message = "Your Password is changed successfully"
@@ -465,14 +492,12 @@ fun ResetPasswordField(
                 onClick = {
                     if (isPasswordStrong) {
                         // Add logic to update password in backend
-                        onPasswordReset
                         successDialog = true
 
                     } else errorDialog = true
                 },
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = if (isSystemInDarkTheme()) Color.White
-                    else Color.Black
+                    containerColor =buttonBg
                 ),
                 modifier = Modifier
                     .padding(horizontal = 8.dp),
@@ -480,8 +505,7 @@ fun ResetPasswordField(
             ) {
                 Text(
                     "Reset Password",
-                    color = if (isSystemInDarkTheme()) Color.Black
-                    else Color.White,
+                    color =buttonText,
                     modifier = Modifier.padding(horizontal = 8.dp)
                 )
             }
