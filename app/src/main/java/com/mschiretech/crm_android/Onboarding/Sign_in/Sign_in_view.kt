@@ -43,6 +43,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.painter.Painter
@@ -69,10 +70,6 @@ import com.mschiretech.crm_android.dialogs.NoInternetDialog
 import com.mschiretech.crm_android.ui.theme.accent
 import com.mschiretech.crm_android.ui.theme.borderDark
 import com.mschiretech.crm_android.ui.theme.borderLight
-import com.mschiretech.crm_android.ui.theme.cardDark
-import com.mschiretech.crm_android.ui.theme.cardLight
-import com.mschiretech.crm_android.ui.theme.navy
-import com.mschiretech.crm_android.ui.theme.peach
 import com.mschiretech.crm_android.ui.theme.textDark
 import com.mschiretech.crm_android.ui.theme.textLight
 import com.mschiretech.crm_android.varifications.userFinder.isUserExist
@@ -83,7 +80,9 @@ fun Sign_in_view(
 ) {
     //Colors
     val isDark = isSystemInDarkTheme()
-    val backgroundColor = if (isDark) navy else peach
+    val backgroundColor = if (isSystemInDarkTheme()) Brush.linearGradient(
+        colors = listOf(Color(0xFF0D0D0D), Color(0xFF5f4B8B), Color(0xFFcbbbf6))
+    ) else Brush.linearGradient(colors = listOf(Color(0xff2b2b2b), Color(0xffa593e0), Color(0xffdcd6f7)))
     val textColor = if (isDark) textDark else textLight
     val borderColor = if (isDark) borderDark else borderLight
     val labelColor = borderColor

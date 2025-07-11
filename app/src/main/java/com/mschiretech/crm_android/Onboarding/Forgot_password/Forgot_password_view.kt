@@ -45,6 +45,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalConfiguration
@@ -88,7 +89,10 @@ fun Forgot_password_view(
 ) {
     //Colors
     val isDark = isSystemInDarkTheme()
-    val backgroundColor = if (isDark) navy else peach
+    val backgroundColor = if (isSystemInDarkTheme()) Brush.linearGradient(
+        colors = listOf(Color(0xFF0D0D0D), Color(0xFF5f4B8B), Color(0xFFcbbbf6))
+    ) else Brush.linearGradient(colors = listOf(Color(0xff2b2b2b), Color(0xffa593e0), Color(0xffdcd6f7)))
+
     val textColor = if (isDark) textDark else textLight
     val borderColor = if (isDark) borderDark else borderLight
     val labelColor = borderColor

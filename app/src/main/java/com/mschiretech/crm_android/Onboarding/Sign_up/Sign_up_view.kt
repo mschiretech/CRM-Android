@@ -90,7 +90,9 @@ fun Sign_up_view(
     //Colors
     val dividerColor = if (isSystemInDarkTheme()) Color.White else Color.Black
     val isDark = isSystemInDarkTheme()
-    val backgroundColor = if (isDark) navy else peach
+    val backgroundColor = if (isSystemInDarkTheme()) Brush.linearGradient(
+        colors = listOf(Color(0xFF0D0D0D), Color(0xFF5f4B8B), Color(0xFFcbbbf6))
+    ) else Brush.linearGradient(colors = listOf(Color(0xff2b2b2b), Color(0xffa593e0), Color(0xffdcd6f7)))
     val cardColor = if (isDark) cardDark else cardLight
     val textColor = if (isDark) textDark else textLight
     val borderColor = if (isDark) borderDark else borderLight
