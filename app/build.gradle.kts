@@ -53,6 +53,7 @@ dependencies {
     // Room Database
     implementation("androidx.room:room-runtime:2.6.1")
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.foundation.layout)
     kapt("androidx.room:room-compiler:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
 
@@ -70,6 +71,10 @@ dependencies {
     // Animations
     implementation("androidx.transition:transition:1.4.1")
     implementation("androidx.compose.animation:animation:1.6.7") // If using Compose
+
+    //Icons
+    implementation("androidx.compose.material:material-icons-extended:1.6.0")
+
 
 
     implementation(libs.androidx.core.ktx)

@@ -1,9 +1,7 @@
-
 import android.content.res.Configuration
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -50,7 +48,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
@@ -75,13 +72,12 @@ import com.mschiretech.crm_android.ui.theme.borderDark
 import com.mschiretech.crm_android.ui.theme.borderLight
 import com.mschiretech.crm_android.ui.theme.cardDark
 import com.mschiretech.crm_android.ui.theme.cardLight
-import com.mschiretech.crm_android.ui.theme.navy
-import com.mschiretech.crm_android.ui.theme.peach
 import com.mschiretech.crm_android.ui.theme.textDark
 import com.mschiretech.crm_android.ui.theme.textLight
 import com.mschiretech.crm_android.varifications.email.isValidEmail
 import com.mschiretech.crm_android.varifications.password.getPasswordStrengthMessage
 import com.mschiretech.crm_android.varifications.password.isStrongPassword
+
 @Composable
 fun Sign_up_view(
     navController: NavController,
@@ -92,7 +88,13 @@ fun Sign_up_view(
     val isDark = isSystemInDarkTheme()
     val backgroundColor = if (isSystemInDarkTheme()) Brush.linearGradient(
         colors = listOf(Color(0xFF0D0D0D), Color(0xFF5f4B8B), Color(0xFFcbbbf6))
-    ) else Brush.linearGradient(colors = listOf(Color(0xff2b2b2b), Color(0xffa593e0), Color(0xffdcd6f7)))
+    ) else Brush.linearGradient(
+        colors = listOf(
+            Color(0xff2b2b2b),
+            Color(0xffa593e0),
+            Color(0xffdcd6f7)
+        )
+    )
     val cardColor = if (isDark) cardDark else cardLight
     val textColor = if (isDark) textDark else textLight
     val borderColor = if (isDark) borderDark else borderLight
@@ -119,7 +121,7 @@ fun Sign_up_view(
     var dialogMessage by remember { mutableStateOf("") }
 
 //    //Orientation Finder
-      val scrollState = rememberScrollState()
+    val scrollState = rememberScrollState()
 //    val configuration = LocalConfiguration.current
 //    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
@@ -128,7 +130,8 @@ fun Sign_up_view(
 
     //Internet Connection Status and dialog
     val context = LocalContext.current
-    val networkState by context.observeNetworkState().collectAsState(initial = NetworkState.Unavailable)
+    val networkState by context.observeNetworkState()
+        .collectAsState(initial = NetworkState.Unavailable)
     var showNoInternetDialog by remember { mutableStateOf(true) }
 
     // Derived states for validation
@@ -175,10 +178,10 @@ fun Sign_up_view(
         }
     }
 
-    if(networkState == NetworkState.Lost){
+    if (networkState == NetworkState.Lost) {
         showNoInternetDialog = true
     }
-    if(networkState == NetworkState.Available){
+    if (networkState == NetworkState.Available) {
         showNoInternetDialog = false
     }
 
@@ -209,243 +212,246 @@ fun Sign_up_view(
                 color = textColor
             )
             Spacer(modifier = Modifier.height(8.dp))
-
-            Card(
-                elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
-                colors = CardDefaults.cardColors(cardColor),
-                shape = RoundedCornerShape(24.dp)
-            ) {
-                Column(
-                    modifier = Modifier.padding(vertical = 8.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
+                Card(
+                    elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
+                    colors = CardDefaults.cardColors(cardColor),
+                    shape = RoundedCornerShape(24.dp)
                 ) {
-                    // Full Name text field
-                    OutlinedTextField(
-                        value = fullName,
-                        onValueChange = {
-                            fullName = it
-                            if (!isFullNameTouched) isFullNameTouched = true
-                        },
-                        label = { Text("Full Name*", fontStyle = FontStyle.Italic) },
-                        singleLine = true,
-                        shape = RoundedCornerShape(24.dp),
-                        leadingIcon = {
-                            Icon(
-                                Icons.Default.Person,
-                                contentDescription = "Full Name",
-                                tint = if (isSystemInDarkTheme()) Color.White
-                                else Color.Black
-                            )
-                        },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = borderColor,
-                            unfocusedBorderColor = borderColor,
-                            cursorColor = borderColor,
-                            focusedLabelColor = labelColor,
-                            unfocusedLabelColor = labelColor,
-                        ),
-                        enabled = true,
-                        isError = isFullNameTouched && !isFullNameValid,
-                        supportingText = if (isFullNameTouched && !isFullNameValid) {
-                            {
-                                Text(
-                                    "Full name must be at least 2 characters",
-                                    color = MaterialTheme.colorScheme.error
-                                )
-                            }
-                        } else null
-                    )
-
-                    // Email text field
-                    OutlinedTextField(
-                        value = email,
-                        onValueChange = {
-                            email = it
-                            if (!isEmailTouched) isEmailTouched = true
-                        },
-                        label = { Text("Email*", fontStyle = FontStyle.Italic) },
-                        leadingIcon = {
-                            Icon(
-                                Icons.Default.Email,
-                                contentDescription = "Email Icon",
-                                tint = if (isSystemInDarkTheme()) Color.White
-                                else Color.Black,
-                            )
-                        },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                        singleLine = true,
-                        shape = RoundedCornerShape(24.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = borderColor,
-                            unfocusedBorderColor = borderColor,
-                            cursorColor = borderColor,
-                            focusedLabelColor = labelColor,
-                            unfocusedLabelColor = labelColor,
-                        ),
-                        enabled = true,
-                        isError = isEmailTouched && email.isNotEmpty() && !isEmailValid,
-                        supportingText = if (isEmailTouched && email.isNotEmpty() && !isEmailValid) {
-                            {
-                                Text(
-                                    "Please enter a valid email address",
-                                    color = MaterialTheme.colorScheme.error
-                                )
-                            }
-                        } else null
-                    )
-                    if (showNoInternetDialog) {
-                        NoInternetDialog(showDialog = showNoInternetDialog, onDismissRequest ={ showNoInternetDialog = false })
-                    }
-                    // Password Text Field
-                    OutlinedTextField(
-                        value = password,
-                        onValueChange = {
-                            password = it
-                            if (!isPasswordTouched) isPasswordTouched = true
-                        },
-                        label = { Text("Password*", fontStyle = FontStyle.Italic) },
-                        leadingIcon = {
-                            Icon(
-                                Icons.Default.Lock,
-                                contentDescription = "Password Icon",
-                                tint = if (isSystemInDarkTheme()) Color.White
-                                else Color.Black,
-                            )
-                        },
-                        visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                        trailingIcon = {
-                            IconButton(onClick = {
-                                isPasswordVisible = !isPasswordVisible
-                            }) {
-                                Image(
-                                    painter = painterResource(id = if (isPasswordVisible) R.drawable.visibility else R.drawable.visibility_off),
-                                    contentDescription = "Toggle Password Visibility",
-                                    modifier = Modifier.size(24.dp),
-                                    colorFilter = ColorFilter.tint(
-                                        if (isSystemInDarkTheme()) Color.White
-                                        else Color.Black
-                                    )
-                                )
-                            }
-                        },
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = borderColor,
-                            unfocusedBorderColor = borderColor,
-                            cursorColor = borderColor,
-                            focusedLabelColor = labelColor,
-                            unfocusedLabelColor = labelColor,
-                        ),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                        singleLine = true,
-                        shape = RoundedCornerShape(24.dp),
-                        enabled = true,
-                        isError = isPasswordTouched && password.isNotEmpty() && !isPasswordStrong,
-                        supportingText = if (isPasswordTouched && password.isNotEmpty() && !isPasswordStrong) {
-                            {
-                                Text(
-                                    getPasswordStrengthMessage(password),
-                                    color = MaterialTheme.colorScheme.onTertiaryContainer
-                                )
-                            }
-                        } else null
-                    )
-
-                    // Confirm Password text field
-                    OutlinedTextField(
-                        value = confirmPassword,
-                        onValueChange = {
-                            confirmPassword = it
-                            if (!isConfirmPasswordTouched) isConfirmPasswordTouched = true
-                        },
-                        label = { Text("Confirm Password*", fontStyle = FontStyle.Italic) },
-                        leadingIcon = {
-                            Icon(
-                                Icons.Default.Lock,
-                                contentDescription = "Password Icon",
-                                tint = if (isSystemInDarkTheme()) Color.White
-                                else Color.Black,
-                            )
-                        },
-                        visualTransformation = if (isConfirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                        trailingIcon = {
-                            IconButton(onClick = {
-                                isConfirmPasswordVisible = !isConfirmPasswordVisible
-                            }) {
-                                Image(
-                                    painter = painterResource(id = if (isConfirmPasswordVisible) R.drawable.visibility else R.drawable.visibility_off),
-                                    contentDescription = "Toggle Password Visibility",
-                                    modifier = Modifier.size(24.dp),
-                                    colorFilter = ColorFilter.tint(
-                                        if (isSystemInDarkTheme()) Color.White
-                                        else Color.Black
-                                    )
-                                )
-                            }
-                        },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                        singleLine = true,
-                        shape = RoundedCornerShape(24.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = borderColor,
-                            unfocusedBorderColor = borderColor,
-                            cursorColor = borderColor,
-                            focusedLabelColor = labelColor,
-                            unfocusedLabelColor = labelColor,
-                        ),
-                        enabled = true,
-                        isError = isConfirmPasswordTouched && confirmPassword.isNotEmpty() && !isPasswordMatch,
-                        supportingText = if (isConfirmPasswordTouched && confirmPassword.isNotEmpty() && !isPasswordMatch) {
-                            {
-                                Text(
-                                    "Passwords do not match",
-                                    color = MaterialTheme.colorScheme.error
-                                )
-                            }
-                        } else null
-                    )
-                    Spacer(Modifier.height(24.dp))
-
-                    Dialog(
-                        showDialog = showDialog,
-                        onDismiss = {
-                            showDialog = false
-                            // Handle post-dialog actions
-                            if (postResult.startsWith("User Created:")) {
-                                // Navigate to login screen on success
-                                navController.navigate(OnboardingScreens.Sign_in.route) {
-                                    popUpTo(OnboardingScreens.Sign_up.route) { inclusive = true }
-                                }
-                            }
-                        },
-                        title = dialogTitle,
-                        message = dialogMessage
-                    )
-
-                    // Sign Up Button
-                    Button(
-                        onClick = {
-                            if (true) {
-                                viewModel.createUser(
-                                    name = fullName.trim(),
-                                    username = fullName.trim(), // or generate username differently
-                                    email = email.trim(),
-                                    password = password
-                                )
-                            }
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = buttonBg
-                        ),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 8.dp),
-                        enabled = isFormValid
+                    Column(
+                        modifier = Modifier.padding(vertical = 8.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
-                        Text("Sign Up", color =buttonText)
+                        // Full Name text field
+                        OutlinedTextField(
+                            value = fullName,
+                            onValueChange = {
+                                fullName = it
+                                if (!isFullNameTouched) isFullNameTouched = true
+                            },
+                            label = { Text("Full Name*", fontStyle = FontStyle.Italic) },
+                            singleLine = true,
+                            shape = RoundedCornerShape(24.dp),
+                            leadingIcon = {
+                                Icon(
+                                    Icons.Default.Person,
+                                    contentDescription = "Full Name",
+                                    tint = if (isSystemInDarkTheme()) Color.White
+                                    else Color.Black
+                                )
+                            },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = borderColor,
+                                unfocusedBorderColor = borderColor,
+                                cursorColor = borderColor,
+                                focusedLabelColor = labelColor,
+                                unfocusedLabelColor = labelColor,
+                            ),
+                            enabled = true,
+                            isError = isFullNameTouched && !isFullNameValid,
+                            supportingText = if (isFullNameTouched && !isFullNameValid) {
+                                {
+                                    Text(
+                                        "Full name must be at least 2 characters",
+                                        color = MaterialTheme.colorScheme.error
+                                    )
+                                }
+                            } else null
+                        )
+
+                        // Email text field
+                        OutlinedTextField(
+                            value = email,
+                            onValueChange = {
+                                email = it
+                                if (!isEmailTouched) isEmailTouched = true
+                            },
+                            label = { Text("Email*", fontStyle = FontStyle.Italic) },
+                            leadingIcon = {
+                                Icon(
+                                    Icons.Default.Email,
+                                    contentDescription = "Email Icon",
+                                    tint = if (isSystemInDarkTheme()) Color.White
+                                    else Color.Black,
+                                )
+                            },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                            singleLine = true,
+                            shape = RoundedCornerShape(24.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = borderColor,
+                                unfocusedBorderColor = borderColor,
+                                cursorColor = borderColor,
+                                focusedLabelColor = labelColor,
+                                unfocusedLabelColor = labelColor,
+                            ),
+                            enabled = true,
+                            isError = isEmailTouched && email.isNotEmpty() && !isEmailValid,
+                            supportingText = if (isEmailTouched && email.isNotEmpty() && !isEmailValid) {
+                                {
+                                    Text(
+                                        "Please enter a valid email address",
+                                        color = MaterialTheme.colorScheme.error
+                                    )
+                                }
+                            } else null
+                        )
+                        if (showNoInternetDialog) {
+                            NoInternetDialog(
+                                showDialog = showNoInternetDialog,
+                                onDismissRequest = { showNoInternetDialog = false })
+                        }
+                        // Password Text Field
+                        OutlinedTextField(
+                            value = password,
+                            onValueChange = {
+                                password = it
+                                if (!isPasswordTouched) isPasswordTouched = true
+                            },
+                            label = { Text("Password*", fontStyle = FontStyle.Italic) },
+                            leadingIcon = {
+                                Icon(
+                                    Icons.Default.Lock,
+                                    contentDescription = "Password Icon",
+                                    tint = if (isSystemInDarkTheme()) Color.White
+                                    else Color.Black,
+                                )
+                            },
+                            visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                            trailingIcon = {
+                                IconButton(onClick = {
+                                    isPasswordVisible = !isPasswordVisible
+                                }) {
+                                    Image(
+                                        painter = painterResource(id = if (isPasswordVisible) R.drawable.visibility else R.drawable.visibility_off),
+                                        contentDescription = "Toggle Password Visibility",
+                                        modifier = Modifier.size(24.dp),
+                                        colorFilter = ColorFilter.tint(
+                                            if (isSystemInDarkTheme()) Color.White
+                                            else Color.Black
+                                        )
+                                    )
+                                }
+                            },
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = borderColor,
+                                unfocusedBorderColor = borderColor,
+                                cursorColor = borderColor,
+                                focusedLabelColor = labelColor,
+                                unfocusedLabelColor = labelColor,
+                            ),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                            singleLine = true,
+                            shape = RoundedCornerShape(24.dp),
+                            enabled = true,
+                            isError = isPasswordTouched && password.isNotEmpty() && !isPasswordStrong,
+                            supportingText = if (isPasswordTouched && password.isNotEmpty() && !isPasswordStrong) {
+                                {
+                                    Text(
+                                        getPasswordStrengthMessage(password),
+                                        color = MaterialTheme.colorScheme.onTertiaryContainer
+                                    )
+                                }
+                            } else null
+                        )
+
+                        // Confirm Password text field
+                        OutlinedTextField(
+                            value = confirmPassword,
+                            onValueChange = {
+                                confirmPassword = it
+                                if (!isConfirmPasswordTouched) isConfirmPasswordTouched = true
+                            },
+                            label = { Text("Confirm Password*", fontStyle = FontStyle.Italic) },
+                            leadingIcon = {
+                                Icon(
+                                    Icons.Default.Lock,
+                                    contentDescription = "Password Icon",
+                                    tint = if (isSystemInDarkTheme()) Color.White
+                                    else Color.Black,
+                                )
+                            },
+                            visualTransformation = if (isConfirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                            trailingIcon = {
+                                IconButton(onClick = {
+                                    isConfirmPasswordVisible = !isConfirmPasswordVisible
+                                }) {
+                                    Image(
+                                        painter = painterResource(id = if (isConfirmPasswordVisible) R.drawable.visibility else R.drawable.visibility_off),
+                                        contentDescription = "Toggle Password Visibility",
+                                        modifier = Modifier.size(24.dp),
+                                        colorFilter = ColorFilter.tint(
+                                            if (isSystemInDarkTheme()) Color.White
+                                            else Color.Black
+                                        )
+                                    )
+                                }
+                            },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                            singleLine = true,
+                            shape = RoundedCornerShape(24.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = borderColor,
+                                unfocusedBorderColor = borderColor,
+                                cursorColor = borderColor,
+                                focusedLabelColor = labelColor,
+                                unfocusedLabelColor = labelColor,
+                            ),
+                            enabled = true,
+                            isError = isConfirmPasswordTouched && confirmPassword.isNotEmpty() && !isPasswordMatch,
+                            supportingText = if (isConfirmPasswordTouched && confirmPassword.isNotEmpty() && !isPasswordMatch) {
+                                {
+                                    Text(
+                                        "Passwords do not match",
+                                        color = MaterialTheme.colorScheme.error
+                                    )
+                                }
+                            } else null
+                        )
+                        Spacer(Modifier.height(24.dp))
+
+                        Dialog(
+                            showDialog = showDialog,
+                            onDismiss = {
+                                showDialog = false
+                                // Handle post-dialog actions
+                                if (postResult.startsWith("User Created:")) {
+                                    // Navigate to login screen on success
+                                    navController.navigate(OnboardingScreens.Sign_in.route) {
+                                        popUpTo(OnboardingScreens.Sign_up.route) {
+                                            inclusive = true
+                                        }
+                                    }
+                                }
+                            },
+                            title = dialogTitle,
+                            message = dialogMessage
+                        )
+
+                        // Sign Up Button
+                        Button(
+                            onClick = {
+                                if (true) {
+                                    viewModel.createUser(
+                                        name = fullName.trim(),
+                                        username = fullName.trim(), // or generate username differently
+                                        email = email.trim(),
+                                        password = password
+                                    )
+                                }
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = buttonBg
+                            ),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 8.dp),
+                            enabled = isFormValid
+                        ) {
+                            Text("Sign Up", color = buttonText)
+                        }
                     }
                 }
-            }
 
             // Rest of your UI remains the same...
             Row(
@@ -465,24 +471,26 @@ fun Sign_up_view(
                 Divider(color = dividerColor, modifier = Modifier.weight(1f))
             }
 
-          Row (
-              modifier = Modifier.fillMaxWidth().padding(8.dp),
-              horizontalArrangement = Arrangement.Center
-          ){
-              SocialLoginButton(
-                  icon = painterResource(id = R.drawable.google),
-                  text = "Google"
-              )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                SocialLoginButton(
+                    icon = painterResource(id = R.drawable.google),
+                    text = "Google"
+                )
 
-              SocialLoginButton(
-                  icon = painterResource(id = R.drawable.github),
-                  text = "Github"
-              )
-          }
+                SocialLoginButton(
+                    icon = painterResource(id = R.drawable.github),
+                    text = "Github"
+                )
+            }
             Spacer(modifier = Modifier.height(12.dp))
 
             Row {
-                Text("Already have an account? ", color =textColor)
+                Text("Already have an account? ", color = textColor)
                 Text(
                     "Sign in",
                     textDecoration = TextDecoration.Underline,
@@ -535,11 +543,11 @@ fun SocialLoginButton(icon: Painter, text: String) {
 @Preview()
 @Composable
 fun Sign_up_Preview() {
- Sign_up_view(navController = rememberNavController())
+    Sign_up_view(navController = rememberNavController())
 }
 
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES,)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun Sign_up_DarkPreview() {
-   Sign_up_view(navController = rememberNavController())
+    Sign_up_view(navController = rememberNavController())
 }

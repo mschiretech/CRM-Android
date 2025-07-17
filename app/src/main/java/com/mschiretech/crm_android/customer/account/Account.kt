@@ -102,7 +102,6 @@ fun Account(
             }
             Spacer(Modifier.height(16.dp))
             Options(
-                navController = navController,
                 title = "Details",
                 icon = R.drawable.edit,
                 onOptionClick = {
@@ -114,7 +113,6 @@ fun Account(
             )
             Spacer(Modifier.height(8.dp))
             Options(
-                navController = navController,
                 title = "Projects",
                 icon = R.drawable.crm,
                 onOptionClick = {
@@ -126,7 +124,6 @@ fun Account(
             )
             Spacer(Modifier.height(8.dp))
             Options(
-                navController = navController,
                 title = "Help",
                 icon = R.drawable.help,
                 onOptionClick = {
@@ -138,7 +135,6 @@ fun Account(
             )
             Spacer(Modifier.height(8.dp))
             Options(
-                navController = navController,
                 title = "Logout",
                 icon = R.drawable.logout,
                 onOptionClick = {
@@ -154,7 +150,6 @@ fun Account(
 
 @Composable
 fun Options(
-    navController: NavHostController,
     title: String = "",
     icon: Int,
     onOptionClick: () -> Unit,

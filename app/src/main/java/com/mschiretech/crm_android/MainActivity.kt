@@ -7,8 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
-import androidx.navigation.compose.rememberNavController
-import com.mschiretech.crm_android.Onboarding.navGraph.Navigation
+import com.mschiretech.crm_android.core.rootNavGraph.RootNavGraph
 import com.mschiretech.crm_android.ui.theme.CRMAndroidTheme
 
 class MainActivity : ComponentActivity() {
@@ -17,9 +16,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             CRMAndroidTheme {
-                val navController = rememberNavController()
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Navigation(navController = navController)
+                    RootNavGraph()
                 }
             }
         }
