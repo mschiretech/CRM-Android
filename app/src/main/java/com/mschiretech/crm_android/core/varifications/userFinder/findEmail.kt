@@ -1,4 +1,4 @@
-package com.mschiretech.crm_android.varifications.userFinder
+package com.mschiretech.crm_android.core.varifications.userFinder
 
 import UserViewModel
 import androidx.compose.runtime.Composable

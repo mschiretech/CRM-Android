@@ -1,4 +1,4 @@
-package com.mschiretech.crm_android.deviceDetails
+package com.mschiretech.crm_android.core.deviceDetails
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalConfiguration

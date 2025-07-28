@@ -72,7 +72,7 @@ import com.mschiretech.crm_android.ui.theme.borderDark
 import com.mschiretech.crm_android.ui.theme.borderLight
 import com.mschiretech.crm_android.ui.theme.textDark
 import com.mschiretech.crm_android.ui.theme.textLight
-import com.mschiretech.crm_android.varifications.userFinder.isUserExist
+import com.mschiretech.crm_android.core.varifications.userFinder.isUserExist
 @Composable
 fun Sign_in_view(
     navController: NavController,

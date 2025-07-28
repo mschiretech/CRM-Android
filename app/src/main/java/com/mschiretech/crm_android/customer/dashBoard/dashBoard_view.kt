@@ -5,8 +5,10 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,17 +21,15 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Business
+import androidx.compose.material.icons.filled.Blinds
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Factory
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.People
-import androidx.compose.material.icons.filled.School
+import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.SupportAgent
+import androidx.compose.material.icons.filled.TempleHindu
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -68,9 +68,9 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.mschiretech.crm_android.R
+import com.mschiretech.crm_android.core.deviceDetails.ScreenHeight
+import com.mschiretech.crm_android.core.deviceDetails.ScreenWidth
 import com.mschiretech.crm_android.customer.navigation.CustomerScreens
-import com.mschiretech.crm_android.deviceDetails.ScreenHeight
-import com.mschiretech.crm_android.deviceDetails.ScreenWidth
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -96,7 +96,7 @@ fun DashBoard(
     var isDashboardEmpty by remember { mutableStateOf(true) }
     var isSearchClicked by remember { mutableStateOf(false) }
 
-    val drawerState = rememberDrawerState(DrawerValue.Closed)
+    val drawerState = rememberDrawerState(DrawerValue.Open)
     val scope = rememberCoroutineScope()
 
     //Device Info
@@ -149,14 +149,16 @@ fun DashBoard(
                     .padding(paddingValues)
             ) {
                 item {
-                   // MySearchScreen()
+                    // MySearchScreen()
 
                 }
             }
             if (isDashboardEmpty) {
                 //If the dashboard is empty, show an empty dashboard
                 Box(
-                    modifier = Modifier.height(screenHeight).fillMaxSize(),
+                    modifier = Modifier
+                        .height(screenHeight)
+                        .fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
                     Column {
@@ -170,7 +172,7 @@ fun DashBoard(
                             "Empty dashboard",
                             fontWeight = MaterialTheme.typography.headlineMedium.fontWeight,
                             fontSize = 32.sp,
-                            fontFamily = FontFamily.Monospace
+                            fontFamily = FontFamily.SansSerif
                         )
                     }
                 }
@@ -187,7 +189,7 @@ fun TopAppBar(
     iconsColor: Color,
     onMenuClick: () -> Unit,
     onAccountClick: () -> Unit,
-    onSearchClick:() -> Unit
+    onSearchClick: () -> Unit
 ) {
     val topBarColor = if (isSystemInDarkTheme()) Color(0xE4352B36) else Color(0x20D84CEE)
     TopAppBar(
@@ -220,7 +222,7 @@ fun TopAppBar(
                     contentDescription = "Search",
                     modifier = Modifier
                         .size(28.dp)
-                    .clickable(onClick = onSearchClick)
+                        .clickable(onClick = onSearchClick)
                 )
             }
             IconButton(onClick = onAccountClick) {
@@ -256,54 +258,98 @@ fun DrawerContent(
     val drawerItems = listOf(
         DrawerItem("Dashboard", CustomerScreens.Dashboard.route, Icons.Default.Home),
         DrawerItem("Products", CustomerScreens.Product.route, Icons.Default.ShoppingCart),
-        DrawerItem("Industries", null, Icons.Default.Factory),
-        DrawerItem("Customers", null, Icons.Default.People),
-        DrawerItem("Learning", null, Icons.Default.School),
-        DrawerItem("Support", null, Icons.Default.SupportAgent),
-        DrawerItem("Company", null, Icons.Default.Business),
-        DrawerItem("Settings", null, Icons.Default.Settings)
+        DrawerItem("Support", CustomerScreens.Support.route, Icons.Default.SupportAgent),
+        DrawerItem(label ="Industries", CustomerScreens.Industries.route, Icons.Default.Blinds)
     )
 
-    Column(modifier = Modifier
-        .fillMaxSize()
-        .background(screenColor)) {
-        Text(
-            "MSC HireTech",
-            color = textColor,
-            fontSize = 20.sp,
-            fontWeight = FontWeight.SemiBold,
-            fontFamily = FontFamily.Serif,
-            modifier = Modifier.padding(16.dp)
-        )
-
-        HorizontalDivider(color = textColor.copy(alpha = 0.3f))
-        Spacer(Modifier.height(8.dp))
-
-        drawerItems.forEach { item ->
-            NavigationDrawerItem(
-                label = { Text(item.label, color = textColor) },
-                icon = item.icon?.let { icon ->
-                    { Icon(icon, contentDescription = item.label, tint = iconsColor) }
-                },
-                selected = false,
-                onClick = {
-                    item.route?.let {
-                        if (currentRoute != it) {
-                            navController.navigate(it) {
-                                popUpTo(navController.graph.startDestinationId) {
-                                    saveState = true
-                                }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        }
-                        onCloseDrawer()
-                    }
-                }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(screenColor),
+        verticalArrangement = Arrangement.SpaceBetween
+    ) {
+        Column {
+            Text(
+                "MSC HireTech",
+                color = textColor,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.SemiBold,
+                fontFamily = FontFamily.Serif,
+                modifier = Modifier.padding(16.dp)
             )
+
+            HorizontalDivider(color = textColor.copy(alpha = 0.3f))
+            Spacer(Modifier.height(8.dp))
+
+            drawerItems.forEach { item ->
+                NavigationDrawerItem(
+                    label = {
+                        Text(
+                            item.label,
+                            color = textColor,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            fontFamily = FontFamily.SansSerif
+                        )
+                    },
+                    icon = item.icon?.let { icon ->
+                        { Icon(icon, contentDescription = item.label, tint = iconsColor) }
+                    },
+                    selected = false,
+                    onClick = {
+                        item.route?.let {
+                            if (currentRoute != it) {
+                                navController.navigate(it) {
+                                    popUpTo(navController.graph.startDestinationId) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            }
+                            onCloseDrawer()
+                        }
+                    }
+                )
+            }
+        }
+        Box(
+            modifier = Modifier
+                .padding(8.dp)
+                .fillMaxWidth()
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Icon(Icons.Default.Phone, contentDescription = "Contact")
+                    Text(
+                        "Contact",
+                        color = textColor,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        fontFamily = FontFamily.SansSerif
+                    )
+                }
+                Text(
+                    "xxxx xxxx xx",
+                    color = textColor,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    fontFamily = FontFamily.SansSerif
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+
         }
     }
 }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MySearchScreen() {
@@ -396,12 +442,6 @@ fun MySearchScreen() {
             }
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewMySearchScreen() {
-    MySearchScreen()
 }
 
 

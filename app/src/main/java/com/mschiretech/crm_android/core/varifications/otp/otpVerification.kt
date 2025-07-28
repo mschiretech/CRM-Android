@@ -1,4 +1,4 @@
-package com.mschiretech.crm_android.varifications.otp
+package com.mschiretech.crm_android.core.varifications.otp
 
 
 fun otp_verification(enteredOTP: String, actualOTP: String): Boolean {

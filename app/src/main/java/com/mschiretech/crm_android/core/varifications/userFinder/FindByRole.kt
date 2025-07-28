@@ -1,4 +1,4 @@
-package com.mschiretech.crm_android.varifications.userFinder
+package com.mschiretech.crm_android.core.varifications.userFinder
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf

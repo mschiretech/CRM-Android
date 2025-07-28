@@ -1,4 +1,4 @@
-package com.mschiretech.crm_android.varifications.password
+package com.mschiretech.crm_android.core.varifications.password
 
 fun isStrongPassword(password: String): Boolean {
     // Check minimum length

@@ -2,11 +2,12 @@ package com.mschiretech.crm_android.customer.navigation
 
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.mschiretech.crm_android.customer.account.Account
 import com.mschiretech.crm_android.customer.dashBoard.DashBoard
+import com.mschiretech.crm_android.customer.dashBoard.drawerItems.Industries
+import com.mschiretech.crm_android.customer.dashBoard.drawerItems.Support
 import com.mschiretech.crm_android.customer.dashBoard.drawerItems.Product
 
 
@@ -23,6 +24,19 @@ fun NavGraphBuilder.CustomerGraph(navController: NavController) {
         }
         composable(route = CustomerScreens.Product.route) {
             Product(navController)
+        }
+        composable (route = CustomerScreens.Support.route){
+            Support(
+               navController,
+                onHelpCenterClick = { /* Handle Help Center click */ },
+                onKnownIssuesClick = { /* Handle Known Issues click */ },
+                onDeveloperDocClick = { /* Handle Developer Documentation click */ }
+            )
+        }
+        composable(
+            route = CustomerScreens.Industries.route
+        ) {
+            Industries(navController)
         }
     }
 }

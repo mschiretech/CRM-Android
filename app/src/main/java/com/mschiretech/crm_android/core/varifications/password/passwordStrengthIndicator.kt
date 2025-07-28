@@ -1,4 +1,4 @@
-package com.mschiretech.crm_android.varifications.password
+package com.mschiretech.crm_android.core.varifications.password
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text

@@ -1,4 +1,4 @@
-package com.mschiretech.crm_android.varifications.email
+package com.mschiretech.crm_android.core.varifications.email
 
 import android.util.Patterns
 

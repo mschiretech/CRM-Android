@@ -71,15 +71,13 @@ import com.mschiretech.crm_android.dialogs.NoInternetDialog
 import com.mschiretech.crm_android.ui.theme.accent
 import com.mschiretech.crm_android.ui.theme.borderDark
 import com.mschiretech.crm_android.ui.theme.borderLight
-import com.mschiretech.crm_android.ui.theme.navy
-import com.mschiretech.crm_android.ui.theme.peach
 import com.mschiretech.crm_android.ui.theme.textDark
 import com.mschiretech.crm_android.ui.theme.textLight
-import com.mschiretech.crm_android.varifications.email.isValidEmail
-import com.mschiretech.crm_android.varifications.otp.otp_verification
-import com.mschiretech.crm_android.varifications.password.getPasswordStrengthMessage
-import com.mschiretech.crm_android.varifications.password.isStrongPassword
-import com.mschiretech.crm_android.varifications.userFinder.isEmailExist
+import com.mschiretech.crm_android.core.varifications.email.isValidEmail
+import com.mschiretech.crm_android.core.varifications.otp.otp_verification
+import com.mschiretech.crm_android.core.varifications.password.getPasswordStrengthMessage
+import com.mschiretech.crm_android.core.varifications.password.isStrongPassword
+import com.mschiretech.crm_android.core.varifications.userFinder.isEmailExist
 
 
 @OptIn(ExperimentalMaterial3Api::class)

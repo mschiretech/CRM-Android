@@ -44,8 +44,8 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.mschiretech.crm_android.R
-import com.mschiretech.crm_android.deviceDetails.ScreenHeight
-import com.mschiretech.crm_android.deviceDetails.ScreenWidth
+import com.mschiretech.crm_android.core.deviceDetails.ScreenHeight
+import com.mschiretech.crm_android.core.deviceDetails.ScreenWidth
 
 @Composable
 fun Product(

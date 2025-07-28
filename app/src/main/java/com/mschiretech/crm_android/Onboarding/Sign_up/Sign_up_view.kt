@@ -74,9 +74,9 @@ import com.mschiretech.crm_android.ui.theme.cardDark
 import com.mschiretech.crm_android.ui.theme.cardLight
 import com.mschiretech.crm_android.ui.theme.textDark
 import com.mschiretech.crm_android.ui.theme.textLight
-import com.mschiretech.crm_android.varifications.email.isValidEmail
-import com.mschiretech.crm_android.varifications.password.getPasswordStrengthMessage
-import com.mschiretech.crm_android.varifications.password.isStrongPassword
+import com.mschiretech.crm_android.core.varifications.email.isValidEmail
+import com.mschiretech.crm_android.core.varifications.password.getPasswordStrengthMessage
+import com.mschiretech.crm_android.core.varifications.password.isStrongPassword
 
 @Composable
 fun Sign_up_view(

@@ -5,4 +5,6 @@ sealed class CustomerScreens (val route : String){
     object Dashboard : CustomerScreens("dashboard")
     object Account : CustomerScreens("account")
     object Product : CustomerScreens("product")
+    object Support : CustomerScreens("support")
+    object Industries : CustomerScreens("industries")
 }
